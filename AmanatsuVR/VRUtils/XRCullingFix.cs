@@ -54,12 +54,12 @@ namespace AmanatsuVR.VRUtils
                 _override = (Il2CppSystem.Action<XRLayout, Camera>)(
                     (System.Action<XRLayout, Camera>)MontaLayout);
                 XRSystem.SetLayoutOverride(_override);
-                PluginLog.Info("[AmanatsuVR][XRCULL] layout override instalado.");
+                PluginLog.Info("[AmanatsuVR][XRCULL] layout override installed.");
             }
             catch (System.Exception ex)
             {
                 _override = null;
-                PluginLog.Warning($"[AmanatsuVR][XRCULL] SetLayoutOverride falhou: {ex.Message}");
+                PluginLog.Warning($"[AmanatsuVR][XRCULL] SetLayoutOverride failed: {ex.Message}");
             }
         }
 
@@ -90,7 +90,7 @@ namespace AmanatsuVR.VRUtils
         /// </summary>
         private static void Passo(string onde)
         {
-            if (!_jaLogouLayout) PluginLog.Info($"[AmanatsuVR][XRCULL] passo: {onde}");
+            if (!_jaLogouLayout) PluginLog.Info($"[AmanatsuVR][XRCULL] step: {onde}");
         }
 
         private static void MontaLayout(XRLayout layout, Camera camera)
@@ -139,9 +139,9 @@ namespace AmanatsuVR.VRUtils
                     // titulo nada e degenerado e as linhas se esgotavam antes de chegar no mapa.
                     if (_consertos++ < 8)
                         PluginLog.Info($"[AmanatsuVR][XRCULL] pass {i} cullingPassId={pass.cullingPassId}"
-                            + $" multipassId={pass.multipassId} degenerado, substituido"
+                            + $" multipassId={pass.multipassId} degenerate, replaced"
                             + $" (mask 0x{pass.cullingParams.cullingMask:X8},"
-                            + $" planos={pass.cullingParams.cullingPlaneCount})");
+                            + $" planes={pass.cullingParams.cullingPlaneCount})");
                 }
 
                 Passo("fim, sem crash");
@@ -150,7 +150,7 @@ namespace AmanatsuVR.VRUtils
             catch (System.Exception ex)
             {
                 _jaLogouLayout = true;
-                PluginLog.Warning($"[AmanatsuVR][XRCULL] correcao falhou: {ex.GetType().Name}: {ex.Message}");
+                PluginLog.Warning($"[AmanatsuVR][XRCULL] fix failed: {ex.GetType().Name}: {ex.Message}");
             }
         }
     }

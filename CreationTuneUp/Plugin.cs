@@ -38,9 +38,29 @@ namespace CreationTuneUp
         public override void Load()
         {
             Logger = Log;
+            // SliderUnlocker does the same job: two unlockers widening the same sliders and clamps would fight.
+            // Checked by file, because at our Load() it may not be loaded yet.
+            string other = FindOtherSliderUnlocker();
+            if (other != null)
+            {
+                Logger.LogWarning($"SliderUnlocker found ({other}): CreationTuneUp stays off.");
+                return;
+            }
             try { new Harmony(Guid).PatchAll(typeof(Patches)); }
             catch (Exception ex) { Logger.LogError($"Patch failed: {ex}"); return; }
             Logger.Info($"Creation sliders unlocked to {MinRate * 100:0}..{MaxRate * 100:0}.");
+        }
+
+        private static string FindOtherSliderUnlocker()
+        {
+            try
+            {
+                foreach (var f in System.IO.Directory.EnumerateFiles(Paths.PluginPath, "*.dll", System.IO.SearchOption.AllDirectories))
+                    if (System.IO.Path.GetFileNameWithoutExtension(f).Contains("SliderUnlocker", StringComparison.OrdinalIgnoreCase))
+                        return f;
+            }
+            catch (Exception ex) { Logger.LogWarning($"SliderUnlocker check failed: {ex.Message}"); }
+            return null;
         }
     }
 

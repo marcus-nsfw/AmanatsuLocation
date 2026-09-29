@@ -40,9 +40,9 @@ namespace AmanatsuVR
             if (!hasVrArg && !hasVrEnv)
             {
                 PluginLog.Info("---------------------------------------------------------------");
-                PluginLog.Info("[AmanatsuVR] Modo Desktop detectado (VR inativo).");
-                PluginLog.Info("[AmanatsuVR] O jogo continuara funcionando normalmente no monitor.");
-                PluginLog.Info("[AmanatsuVR] Para jogar em VR, inicie pelo atalho 'Iniciar_VR.bat'.");
+                PluginLog.Info("[AmanatsuVR] Desktop mode detected (VR inactive).");
+                PluginLog.Info("[AmanatsuVR] The game keeps running normally on the monitor.");
+                PluginLog.Info("[AmanatsuVR] To play in VR, start from the shortcut 'Iniciar_VR.bat'.");
                 PluginLog.Info("---------------------------------------------------------------");
 
                 // Unica coisa que roda sem VR: o dump da pele na tela de criacao. E o controle -
@@ -60,13 +60,13 @@ namespace AmanatsuVR
                     HarmonyLib.Harmony.CreateAndPatchAll(
                         typeof(VRUtils.CharSetReceiverPatch), "com.marcus.amanatsu.vr.diag");
                 }
-                catch (Exception ex) { PluginLog.Warning($"[AmanatsuVR] patch de diagnostico falhou: {ex.Message}"); }
+                catch (Exception ex) { PluginLog.Warning($"[AmanatsuVR] diagnostic patch failed: {ex.Message}"); }
                 return;
             }
 
             IsVRModeActive = true;
             PluginLog.Info("===============================================================");
-            PluginLog.Info("[AmanatsuVR] Modo VR ATIVADO via inicializador!");
+            PluginLog.Info("[AmanatsuVR] VR mode ENABLED via launcher!");
             PluginLog.Info("===============================================================");
 
             PluginConfig.Setup(Config);
@@ -78,18 +78,18 @@ namespace AmanatsuVR
             try
             {
                 HarmonyLib.Harmony.CreateAndPatchAll(typeof(Plugin).Assembly, "com.marcus.amanatsu.vr");
-                PluginLog.Info("[AmanatsuVR] Patches Harmony de VR aplicados com sucesso.");
+                PluginLog.Info("[AmanatsuVR] VR Harmony patches applied successfully.");
                 VRUtils.TimeScaleGuard.PatchSetters();
             }
             catch (Exception ex)
             {
-                PluginLog.Warning($"[AmanatsuVR] Aviso ao aplicar patches Harmony: {ex.Message}");
+                PluginLog.Warning($"[AmanatsuVR] Warning applying Harmony patches: {ex.Message}");
             }
 
             // Inicializar o subsistema OpenVR e SteamVR
             VR.Initialize(() =>
             {
-                PluginLog.Info("[AmanatsuVR] Subsistema VR pronto! Criando VRController persistente...");
+                PluginLog.Info("[AmanatsuVR] VR subsystem ready! Creating persistent VRController...");
 
                 // volumeDepth > 1 => texture array => Single Pass Instanced. Os shaders do jogo
                 // foram compilados sem estéreo e só escrevem na fatia 0 (olho esquerdo) nesse modo.
@@ -113,7 +113,7 @@ namespace AmanatsuVR
         {
             if (!IsVRModeActive) return;
 
-            PluginLog.Info($"[AmanatsuVR] Cena carregada: '{scene.name}' (Modo: {mode})");
+            PluginLog.Info($"[AmanatsuVR] Scene loaded: '{scene.name}' (Mode: {mode})");
             EnsureVRController();
 
             if (_activeVRController != null)
@@ -132,7 +132,7 @@ namespace AmanatsuVR
                     var root = new GameObject("AmanatsuVR_Root");
                     GameObject.DontDestroyOnLoad(root);
                     _activeVRController = root.AddComponent<VRController>();
-                    PluginLog.Info("[AmanatsuVR] AmanatsuVR_Root persistente criado com sucesso.");
+                    PluginLog.Info("[AmanatsuVR] AmanatsuVR_Root persistent created successfully.");
                 }
                 else
                 {

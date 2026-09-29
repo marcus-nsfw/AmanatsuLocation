@@ -31,7 +31,7 @@ namespace Amanatsu.Translation
         public override void Load()
         {
             Logger = Log;
-            Logger.Info("Amanatsu Translation Plugin inicializando...");
+            Logger.Info("Amanatsu Translation Plugin initializing...");
 
             LoadTranslations();
 
@@ -123,7 +123,7 @@ namespace Amanatsu.Translation
                 }
             }, "Localize.Translate.Manager.get_IsTranslate");
 
-            Logger.Info("Inicializacao do Amanatsu Translation concluida!");
+            Logger.Info("Amanatsu Translation initialization complete!");
         }
 
         private static void SafePatch(Action patchAction, string name)
@@ -131,11 +131,11 @@ namespace Amanatsu.Translation
             try
             {
                 patchAction();
-                Logger.Info($"Hook [{name}] aplicado com sucesso!");
+                Logger.Info($"Hook [{name}] applied successfully!");
             }
             catch (Exception ex)
             {
-                Logger.LogWarning($"Hook [{name}] indisponivel: {ex.Message}");
+                Logger.LogWarning($"Hook [{name}] unavailable: {ex.Message}");
             }
         }
 
@@ -153,7 +153,7 @@ namespace Amanatsu.Translation
 
                 if (!Directory.Exists(transDir))
                 {
-                    Logger.LogWarning($"Diretorio de traducao nao encontrado em: {transDir}");
+                    Logger.LogWarning($"Translation directory not found at: {transDir}");
                     return;
                 }
 
@@ -231,16 +231,16 @@ namespace Amanatsu.Translation
                         }
                         catch (Exception ex)
                         {
-                            Logger.LogError($"Erro ao ler cena ADV {file}: {ex.Message}");
+                            Logger.LogError($"Error reading ADV scene {file}: {ex.Message}");
                         }
                     }
                 }
 
-                Logger.Info($"Total de traducoes unicas carregadas: {_translations.Count} (Normalizadas: {_normalizedTranslations.Count}, Stripped: {_strippedTranslations.Count})");
+                Logger.Info($"Total unique translations loaded: {_translations.Count} (Normalized: {_normalizedTranslations.Count}, Stripped: {_strippedTranslations.Count})");
             }
             catch (Exception ex)
             {
-                Logger.LogError($"Erro fatal ao carregar traducoes: {ex}");
+                Logger.LogError($"Fatal error loading translations: {ex}");
             }
         }
 
@@ -486,7 +486,7 @@ namespace Amanatsu.Translation
         {
             if (TryTranslate(__result, out string translated))
             {
-                Logger.Info($"[ADV Fala] '{__result}' -> '{translated}'");
+                Logger.Info($"[ADV Line] '{__result}' -> '{translated}'");
                 __result = translated;
             }
         }
@@ -560,7 +560,7 @@ namespace Amanatsu.Translation
             }
             catch (Exception ex)
             {
-                Logger.LogError($"Erro em TextController_Set_Prefix: {ex}");
+                Logger.LogError($"Error in TextController_Set_Prefix: {ex}");
             }
         }
 

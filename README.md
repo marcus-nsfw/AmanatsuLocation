@@ -147,7 +147,7 @@ Any manual act or finish shortcut turns automatic mode off.
 
 The plugin loads the converted meshes from `BepInEx\plugins\AmanatsuUncensor\genitais\*.bin`.
 
-The body bundle `lib\chara\body\body_00.unity3d` is hard-modded (base body prepared for the 3D genitals).
+The plugin does not modify any game file (no hard-modded `body_00.unity3d`), so it does not conflict with third-party mods that touch the body files.
 
 See `AmanatsuUncensor/README.md` for the full technical notes (in Portuguese).
 
@@ -165,6 +165,13 @@ Translates the UI (TextMeshPro, uGUI and the game's own text components) and dia
 ## CreationTuneUp
 
 In character creation, the 0 to 100 sliders accept **-100 to 200**, both dragging and typing. The class comment explains every place where the game clamps the value, as read in IDA.
+
+---
+
+## Compatibility with other mods
+
+- **Another uncensor** (**AL_Uncensor** or **UncensorSelector** loaded): AmanatsuUncensor turns off its 3D genitals, its bone changes (vulva, anus, penis stretch and aim) and the genital collision, and leaves the genitals to the other mod. Mosaic removal and Freemode keep working. Detection (`Genitais.OtherUncensor`) runs on the first `Human` update over the chainloader's loaded plugins (GUID, name and file). During our `Load()` the plugins after us are not loaded yet. The BepInEx log names the detected mod.
+- **SliderUnlocker** (`SliderUnlocker.dll` anywhere under `BepInEx\plugins`): CreationTuneUp does not patch anything, since both would widen the same sliders. This one is checked by file at `Load()`.
 
 ---
 

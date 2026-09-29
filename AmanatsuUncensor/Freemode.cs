@@ -71,11 +71,11 @@ namespace Amanatsu.Uncensor
                     AccessTools.Method(typeof(AL.H.List.AnimationListInfo), nameof(AL.H.List.AnimationListInfo.CheckReleasePhase)),
                     postfix: new HarmonyMethod(typeof(Freemode), nameof(UnlockAllPostures)));
 
-                UncensorPlugin.Logger.Info("[FREE] hooks aplicados.");
+                UncensorPlugin.Logger.Info("[FREE] hooks applied.");
             }
             catch (Exception ex)
             {
-                UncensorPlugin.Logger.LogWarning($"[FREE] nao consegui hookar: {ex.Message}");
+                UncensorPlugin.Logger.LogWarning($"[FREE] could not hook: {ex.Message}");
             }
         }
 
@@ -88,7 +88,7 @@ namespace Amanatsu.Uncensor
                 var modelo = __instance.GetMenuButton(ButtonIndex.Memory);
                 if (modelo == null)
                 {
-                    UncensorPlugin.Logger.LogWarning("[FREE] botao modelo nao encontrado; nada injetado.");
+                    UncensorPlugin.Logger.LogWarning("[FREE] template button not found; nothing injected.");
                     return;
                 }
 
@@ -114,9 +114,9 @@ namespace Amanatsu.Uncensor
                 _vivos.Add(cb);
                 botao.onClick.AddListener(cb);
 
-                UncensorPlugin.Logger.Info("[FREE] botao Freemode injetado no menu do titulo.");
+                UncensorPlugin.Logger.Info("[FREE] Freemode button injected into the title menu.");
             }
-            catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[FREE] injecao falhou: {ex}"); }
+            catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[FREE] injection failed: {ex}"); }
         }
 
         private static void Enter()
@@ -125,12 +125,12 @@ namespace Amanatsu.Uncensor
             {
                 _emRecollection = true;
                 AL.Title.TitleScene.GotoMemoryScene(false);
-                UncensorPlugin.Logger.Info("[FREE] abrindo Recollection como menu de escolha.");
+                UncensorPlugin.Logger.Info("[FREE] opening Recollection as the pick menu.");
             }
             catch (Exception ex)
             {
                 _emRecollection = false;
-                UncensorPlugin.Logger.LogWarning($"[FREE] nao consegui abrir Recollection: {ex}");
+                UncensorPlugin.Logger.LogWarning($"[FREE] could not open Recollection: {ex}");
             }
         }
 
@@ -139,7 +139,7 @@ namespace Amanatsu.Uncensor
             if (!_emRecollection) return true;
             if (__instance._human == null || __instance.CurrentMemory == null)
             {
-                UncensorPlugin.Logger.LogWarning("[FREE] escolha local e heroina antes do play.");
+                UncensorPlugin.Logger.LogWarning("[FREE] pick a location and heroine before play.");
                 return false;
             }
             BuildHScene(__instance);
@@ -153,7 +153,7 @@ namespace Amanatsu.Uncensor
                 int periodo = mm._toggleMorning.isOn ? 1 : mm._togglEvening.isOn ? 2 : mm._togglNight.isOn ? 3 : 1;
                 int mapa = AL.ContentProvider.ShortMovieInfoContents[mm.CurrentMemory.Id].MapID;
                 var carta = mm._human;
-                UncensorPlugin.Logger.Info($"[FREE] local {mm.CurrentMemory.Id} -> mapa {mapa}, periodo {periodo}, carta {carta.CharaFileName}");
+                UncensorPlugin.Logger.Info($"[FREE] location {mm.CurrentMemory.Id} -> map {mapa}, period {periodo}, card {carta.CharaFileName}");
 
                 mm._canvas.gameObject.SetActive(false);
 
@@ -163,10 +163,10 @@ namespace Amanatsu.Uncensor
                 npc.DataID = carta.About.dataID;
                 npc.UserID = carta.About.userID;
                 var heroina = await AL.Actor.Rent<AL.Heroine>(npc, 1, Manager.Game.AccessorySlotNum, "", false);
-                UncensorPlugin.Logger.Info("[FREE] heroina criada.");
+                UncensorPlugin.Logger.Info("[FREE] heroine created.");
 
                 await Manager.MapManager.Instance.ChangeMapAsync(mapa, periodo, false, null, true, false);
-                UncensorPlugin.Logger.Info("[FREE] mapa carregado.");
+                UncensorPlugin.Logger.Info("[FREE] map loaded.");
 
                 // Fora do modo historia nao existe Player: aluga um com carta masculina aleatoria,
                 // pelo mesmo Actor.Rent (sex 0 = masculino).
@@ -184,7 +184,7 @@ namespace Amanatsu.Uncensor
                     pd.UserID = cartaM.About.userID;
                     rentedPlayer = await AL.Actor.Rent<AL.Player>(pd, 0, Manager.Game.AccessorySlotNum, "", false);
                     jogadorHuman = rentedPlayer.Human;
-                    UncensorPlugin.Logger.Info($"[FREE] player criado com {System.IO.Path.GetFileName(arquivoM)}.");
+                    UncensorPlugin.Logger.Info($"[FREE] player created with {System.IO.Path.GetFileName(arquivoM)}.");
                 }
 
                 // Igual ao HDetail: [player, parceira, terceiro-ou-null]. Repetir a heroina no 3o slot
@@ -203,16 +203,16 @@ namespace Amanatsu.Uncensor
                     AL.H.PlaceType.Floor,
                     camera,
                     humanos);
-                UncensorPlugin.Logger.Info("[FREE] iniciando HScene.");
+                UncensorPlugin.Logger.Info("[FREE] starting HScene.");
                 // InitializeAsync so retorna quando o jogador encerra a H.
                 _inFreemodeH = true;
                 try { await AL.H.HScene.InitializeAsync(parametro, new Il2CppSystem.Threading.CancellationToken()); }
                 finally { _inFreemodeH = false; }
-                UncensorPlugin.Logger.Info("[FREE] H encerrada; voltando pra Recollection.");
+                UncensorPlugin.Logger.Info("[FREE] H ended; returning to Recollection.");
 
                 await Cleanup(mm, heroina, rentedPlayer);
             }
-            catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[FREE] falhou montando a H: {ex}"); }
+            catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[FREE] failed building the H: {ex}"); }
         }
 
         // MEDIDO (decompilado, final do PlayShortMove): a limpeza que o jogo faz depois do clipe pra
@@ -231,7 +231,7 @@ namespace Amanatsu.Uncensor
             Manager.Sound.Stop(Manager.Sound.Type.ENV);
             mm._canvas.gameObject.SetActive(true);
             await Manager.Game.SceneFade(FadeCanvas.Fade.Out, false, true);
-            UncensorPlugin.Logger.Info("[FREE] de volta na Recollection.");
+            UncensorPlugin.Logger.Info("[FREE] back in Recollection.");
         }
 
         private static string CartaMasculinaAleatoria()
@@ -255,7 +255,7 @@ namespace Amanatsu.Uncensor
                 __instance.AlreadyRead = true;
                 if (__instance.Selectable != null) __instance.Selectable.SetActive(true);
             }
-            catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[FREE] erro ao desbloquear local: {ex}"); }
+            catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[FREE] error unlocking location: {ex}"); }
         }
     }
 }

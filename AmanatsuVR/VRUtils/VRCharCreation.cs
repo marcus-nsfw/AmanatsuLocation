@@ -73,7 +73,7 @@ namespace AmanatsuVR.VRUtils
             if (ativoAgora != Ativo)
             {
                 Ativo = ativoAgora;
-                PluginLog.Info($"[AmanatsuVR][CUSTOM] criacao de personagem {(Ativo ? "ENTROU" : "saiu")}.");
+                PluginLog.Info($"[AmanatsuVR][CUSTOM] character creation {(Ativo ? "ENTERED" : "left")}.");
                 if (!Ativo) { _jaDiagnosticou = false; Teardown(); return; }
             }
 
@@ -205,7 +205,7 @@ namespace AmanatsuVR.VRUtils
                 // it (the model sat off its desktop position until leaving and entering again).
                 if (_rts[i] != null && (_rts[i].width != Screen.width || _rts[i].height != Screen.height))
                 {
-                    PluginLog.Info($"[AmanatsuVR][CUSTOM] tela mudou {_rts[i].width}x{_rts[i].height} -> {Screen.width}x{Screen.height}; textura refeita.");
+                    PluginLog.Info($"[AmanatsuVR][CUSTOM] screen changed {_rts[i].width}x{_rts[i].height} -> {Screen.width}x{Screen.height}; texture recreated.");
                     if (_previa != null && _previa.targetTexture == _rts[i]) _previa.targetTexture = null;
                     _rts[i].Release();
                     Object.Destroy(_rts[i]);
@@ -265,8 +265,8 @@ namespace AmanatsuVR.VRUtils
                 // Tela cheia e clicavel engoliria todos os botoes - e o arrasto que gira o modelo.
                 _imagem.raycastTarget = false;
 
-                PluginLog.Info($"[AmanatsuVR][CUSTOM] imagem do modelo inserida em '{canvas.name}'"
-                    + $" (ordem={canvas.sortingOrder}, layer={go.layer}).");
+                PluginLog.Info($"[AmanatsuVR][CUSTOM] model image inserted in '{canvas.name}'"
+                    + $" (order={canvas.sortingOrder}, layer={go.layer}).");
             }
         }
 
@@ -316,11 +316,11 @@ namespace AmanatsuVR.VRUtils
 
                 if (human.Face != null) human.Face.AddUpdateCMFaceFlagsFull();
                 if (human.Body != null) human.Body.AddUpdateCMBodyFlagsFull();
-                PluginLog.Info("[AmanatsuVR][CUSTOM] remontagem completa marcada.");
+                PluginLog.Info("[AmanatsuVR][CUSTOM] full rebuild flagged.");
             }
             catch (System.Exception ex)
             {
-                PluginLog.Warning($"[AmanatsuVR][CUSTOM] remontagem falhou: {ex.Message}");
+                PluginLog.Warning($"[AmanatsuVR][CUSTOM] rebuild failed: {ex.Message}");
             }
         }
 
@@ -344,21 +344,21 @@ namespace AmanatsuVR.VRUtils
 
         private static void Dump(string rotulo, Character.HumanData d)
         {
-            if (d == null) { PluginLog.Info($"[AmanatsuVR][DADO] {rotulo}: NULO"); return; }
+            if (d == null) { PluginLog.Info($"[AmanatsuVR][DATA] {rotulo}: NULL"); return; }
 
             var c = d.Custom;
             if (c == null || c.Body == null || c.Face == null)
             {
-                PluginLog.Info($"[AmanatsuVR][DADO] {rotulo}: Custom/Body/Face nulo.");
+                PluginLog.Info($"[AmanatsuVR][DATA] {rotulo}: Custom/Body/Face null.");
                 return;
             }
 
-            PluginLog.Info($"[AmanatsuVR][DADO] {rotulo}: arquivo='{d.CharaFileName}' erro={d._lastLoadErrorCode}"
-                + $" versao={d.NowVersion}");
-            PluginLog.Info($"[AmanatsuVR][DADO]   body.skinId={c.Body.skinId}"
+            PluginLog.Info($"[AmanatsuVR][DATA] {rotulo}: file='{d.CharaFileName}' error={d._lastLoadErrorCode}"
+                + $" version={d.NowVersion}");
+            PluginLog.Info($"[AmanatsuVR][DATA]   body.skinId={c.Body.skinId}"
                 + $" skinMain={c.Body.skinMainColor} skinShadow={c.Body.skinShadowColor}"
                 + $" nip={c.Body.nipColor}");
-            PluginLog.Info($"[AmanatsuVR][DADO]   face.headId={c.Face.headId} skinId={c.Face.skinId}"
+            PluginLog.Info($"[AmanatsuVR][DATA]   face.headId={c.Face.headId} skinId={c.Face.skinId}"
                 + $" eyebrow={c.Face.eyebrowColor} nose={c.Face.noseColor} detail={c.Face.detailColor}");
         }
 
@@ -394,7 +394,7 @@ namespace AmanatsuVR.VRUtils
 
                 _cenaMedida = cena;
                 var mat = alvo.sharedMaterial;
-                PluginLog.Info($"[AmanatsuVR][SKIN] cena='{cena}' renderer='{alvo.gameObject.name}'"
+                PluginLog.Info($"[AmanatsuVR][SKIN] scene='{cena}' renderer='{alvo.gameObject.name}'"
                     + $" material='{mat.name}' keywords={string.Join(",", mat.shaderKeywords)}");
 
                 var sh = mat.shader;
@@ -420,7 +420,7 @@ namespace AmanatsuVR.VRUtils
             }
             catch (System.Exception ex)
             {
-                PluginLog.Warning($"[AmanatsuVR][SKIN] medir pele falhou: {ex.Message}");
+                PluginLog.Warning($"[AmanatsuVR][SKIN] measuring skin failed: {ex.Message}");
             }
         }
 
@@ -450,14 +450,14 @@ namespace AmanatsuVR.VRUtils
                     if (l == null) continue;
                     if ((_mascaraModelo & (1 << l.gameObject.layer)) != 0) continue;
 
-                    PluginLog.Info($"[AmanatsuVR][LUZ] '{l.name}' movida da layer"
-                        + $" {l.gameObject.layer} para {layerModelo} (fora da mascara das cameras).");
+                    PluginLog.Info($"[AmanatsuVR][LIGHT] '{l.name}' moved from layer"
+                        + $" {l.gameObject.layer} to {layerModelo} (outside the cameras' mask).");
                     l.gameObject.layer = layerModelo;
                 }
             }
             catch (System.Exception ex)
             {
-                PluginLog.Warning($"[AmanatsuVR][LUZ] mover luz falhou: {ex.Message}");
+                PluginLog.Warning($"[AmanatsuVR][LIGHT] moving light failed: {ex.Message}");
             }
         }
 
@@ -482,24 +482,24 @@ namespace AmanatsuVR.VRUtils
                 int mascaraVR = ((mascaraCam | VRController.ExtraGameCullingMask)
                     & ~((1 << 15) | VRController.MascaraOculta)) | (1 << 31);
 
-                PluginLog.Info($"[AmanatsuVR][LUZ] mascaraJogo=0x{mascaraCam:X8} mascaraVR=0x{mascaraVR:X8}"
-                    + $" ambiente={RenderSettings.ambientLight} modo={RenderSettings.ambientMode}");
+                PluginLog.Info($"[AmanatsuVR][LIGHT] gameMask=0x{mascaraCam:X8} vrMask=0x{mascaraVR:X8}"
+                    + $" ambient={RenderSettings.ambientLight} mode={RenderSettings.ambientMode}");
 
                 foreach (var l in Object.FindObjectsOfType<Light>(true))
                 {
                     if (l == null) continue;
                     int bit = 1 << l.gameObject.layer;
-                    PluginLog.Info($"[AmanatsuVR][LUZ]   '{l.name}' layer={l.gameObject.layer}"
-                        + $" tipo={l.type} intensidade={l.intensity:F2} ligada={l.enabled}"
-                        + $" ativa={l.gameObject.activeInHierarchy}"
+                    PluginLog.Info($"[AmanatsuVR][LIGHT]   '{l.name}' layer={l.gameObject.layer}"
+                        + $" type={l.type} intensity={l.intensity:F2} enabled={l.enabled}"
+                        + $" active={l.gameObject.activeInHierarchy}"
                         + $" cullingMask=0x{l.cullingMask:X8}"
-                        + $" naVR={((mascaraVR & bit) != 0)}"
-                        + $" pai='{(l.transform.parent != null ? l.transform.parent.name : "-")}'");
+                        + $" inVR={((mascaraVR & bit) != 0)}"
+                        + $" parent='{(l.transform.parent != null ? l.transform.parent.name : "-")}'");
                 }
             }
             catch (System.Exception ex)
             {
-                PluginLog.Warning($"[AmanatsuVR][LUZ] medir luzes falhou: {ex.Message}");
+                PluginLog.Warning($"[AmanatsuVR][LIGHT] measuring lights failed: {ex.Message}");
             }
         }
 
@@ -538,7 +538,7 @@ namespace AmanatsuVR.VRUtils
             }
             catch (System.Exception ex)
             {
-                PluginLog.Warning($"[AmanatsuVR][CUSTOM] medir entrada falhou: {ex.Message}");
+                PluginLog.Warning($"[AmanatsuVR][CUSTOM] measuring input failed: {ex.Message}");
             }
         }
 
@@ -546,7 +546,7 @@ namespace AmanatsuVR.VRUtils
         /// jogo nao sao legiveis pela CPU e so um blit as torna observaveis.</summary>
         private void SalvaTextura(Texture tex, string nome)
         {
-            if (tex == null) { PluginLog.Warning($"[AmanatsuVR][CUSTOM] {nome}: textura nula."); return; }
+            if (tex == null) { PluginLog.Warning($"[AmanatsuVR][CUSTOM] {nome}: null texture."); return; }
 
             var tmp = RenderTexture.GetTemporary(tex.width, tex.height, 0, RenderTextureFormat.ARGB32);
             Graphics.Blit(tex, tmp);
@@ -556,7 +556,7 @@ namespace AmanatsuVR.VRUtils
 
         private static void SalvaPng(RenderTexture rt, string nome)
         {
-            if (rt == null) { PluginLog.Warning($"[AmanatsuVR][CUSTOM] {nome}: sem RenderTexture."); return; }
+            if (rt == null) { PluginLog.Warning($"[AmanatsuVR][CUSTOM] {nome}: no RenderTexture."); return; }
 
             var prev = RenderTexture.active;
             RenderTexture.active = rt;
@@ -574,7 +574,7 @@ namespace AmanatsuVR.VRUtils
             System.IO.File.WriteAllBytes(System.IO.Path.Combine(dir, $"CUSTOM_{nome}.png"), bytes);
 
             var c = tex.GetPixel(rt.width / 2, rt.height / 2);
-            PluginLog.Info($"[AmanatsuVR][CUSTOM] {nome} salva ({rt.width}x{rt.height}) centro={c}");
+            PluginLog.Info($"[AmanatsuVR][CUSTOM] {nome} saved ({rt.width}x{rt.height}) center={c}");
             Object.Destroy(tex);
         }
 
@@ -591,7 +591,7 @@ namespace AmanatsuVR.VRUtils
                 var cam = _custom.MainCamera;
                 PluginLog.Info($"[AmanatsuVR][CUSTOM] camera='{(cam != null ? cam.name : "-")}'"
                     + $" fov={(cam != null ? cam.fieldOfView : 0f):F1} pos={(cam != null ? cam.transform.position : Vector3.zero)}"
-                    + $" mascaraModelo=0x{_mascaraModelo:X8} painelVisivel={VRController.PainelVisivel}");
+                    + $" modelMask=0x{_mascaraModelo:X8} panelVisible={VRController.PainelVisivel}");
 
                 MedeLuzes();
 
@@ -609,7 +609,7 @@ namespace AmanatsuVR.VRUtils
                     if (mat == null || mat.shader == null) continue;
 
                     PluginLog.Info($"[AmanatsuVR][CUSTOM]   '{nome}' material='{mat.name}'"
-                        + $" shader='{mat.shader.name}' suportado={mat.shader.isSupported}"
+                        + $" shader='{mat.shader.name}' supported={mat.shader.isSupported}"
                         + $" passes={mat.passCount}");
 
                     // As texturas destes shaders nao se chamam _MainTex; perguntar pelo nome
@@ -621,13 +621,13 @@ namespace AmanatsuVR.VRUtils
                         string prop = sh.GetPropertyName(i);
                         var t = mat.GetTexture(prop);
                         PluginLog.Info($"[AmanatsuVR][CUSTOM]     {prop} = "
-                            + (t != null ? $"{t.name} {t.width}x{t.height} ({t.GetIl2CppType().Name})" : "NULA"));
+                            + (t != null ? $"{t.name} {t.width}x{t.height} ({t.GetIl2CppType().Name})" : "NULL"));
                     }
                 }
             }
             catch (System.Exception ex)
             {
-                PluginLog.Warning($"[AmanatsuVR][CUSTOM] diagnostico falhou: {ex.Message}");
+                PluginLog.Warning($"[AmanatsuVR][CUSTOM] diagnostic failed: {ex.Message}");
             }
         }
     }

@@ -110,7 +110,7 @@ namespace AmanatsuVR.VRUtils
         {
             MainVRCamera = vrCamera;
             TargetUIScreen = uiScreen;
-            PluginLog.Info("[AmanatsuVR] VRControllerLaser inicializado com suporte a Dual-Hand.");
+            PluginLog.Info("[AmanatsuVR] VRControllerLaser initialized with Dual-Hand support.");
         }
 
         private void EnsureLaserObjects()
@@ -279,14 +279,14 @@ namespace AmanatsuVR.VRUtils
                 ActiveRole = ETrackedControllerRole.LeftHand;
                 _prevActiveTrigger = false; // Permite que o mesmo toque registre o clique na nova mão
                 TriggerHaptic(leftDev, 800);
-                PluginLog.Info($"[AmanatsuVR] Laser alternado para mão ESQUERDA via gatilho! (devIndex={leftDev})");
+                PluginLog.Info($"[AmanatsuVR] Laser switched to LEFT hand via trigger! (devIndex={leftDev})");
             }
             else if (rightTriggerDown && ActiveRole != ETrackedControllerRole.RightHand)
             {
                 ActiveRole = ETrackedControllerRole.RightHand;
                 _prevActiveTrigger = false;
                 TriggerHaptic(rightDev, 800);
-                PluginLog.Info($"[AmanatsuVR] Laser alternado para mão DIREITA via gatilho! (devIndex={rightDev})");
+                PluginLog.Info($"[AmanatsuVR] Laser switched to RIGHT hand via trigger! (devIndex={rightDev})");
             }
 
             // Fallback se a mão ativa não estiver conectada
@@ -634,7 +634,7 @@ namespace AmanatsuVR.VRUtils
                     {
                         CameraDaMassagemMorta = CameraDaMassagem;
                         CameraDaMassagem = null;
-                        PluginLog.Info($"[AmanatsuVR][OLEO] massagem encerrada; camera '{CameraDaMassagemMorta.name}' na lista negra.");
+                        PluginLog.Info($"[AmanatsuVR][OIL] massage ended; camera '{CameraDaMassagemMorta.name}' blocklisted.");
                     }
                 }
                 return _massagem;
@@ -711,8 +711,8 @@ namespace AmanatsuVR.VRUtils
             if (Time.unscaledTime - _ultimoLogMira > 5f)
             {
                 _ultimoLogMira = Time.unscaledTime;
-                PluginLog.Info($"[AmanatsuVR][MIRA] camera='{cam.name}' alvo='{(acertou ? hit.collider.name : "sem colisor")}'"
-                    + $" dist={_alcanceLaser:F2} tela={VirtualMousePosition}");
+                PluginLog.Info($"[AmanatsuVR][AIM] camera='{cam.name}' target='{(acertou ? hit.collider.name : "no collider")}'"
+                    + $" dist={_alcanceLaser:F2} screen={VirtualMousePosition}");
                 LogSelecao(sel, cam, mascara, alcance);
             }
         }
@@ -726,7 +726,7 @@ namespace AmanatsuVR.VRUtils
         {
             if (sel == null)
             {
-                PluginLog.Info("[AmanatsuVR][ALVO] OutlinableManager ausente nesta cena");
+                PluginLog.Info("[AmanatsuVR][TARGET] OutlinableManager absent in this scene");
                 return;
             }
 
@@ -746,12 +746,12 @@ namespace AmanatsuVR.VRUtils
                 // VirtualMousePosition, o patch nao esta valendo e o jogo le outra coisa.
                 Vector3 lido = Input.mousePosition;
 
-                PluginLog.Info($"[AmanatsuVR][ALVO] enable={AL.OutlinableManager.Enable} atual='{atual}' mascara=0x{mascara:X}"
-                    + $" alcance={alcance:F1} raioDaCamera->{batida}"
-                    + $" | updateProc={VR_OutlinableManager_UpdateProc_Patch.Chamadas} mouseLido={lido}"
+                PluginLog.Info($"[AmanatsuVR][TARGET] enable={AL.OutlinableManager.Enable} current='{atual}' mask=0x{mascara:X}"
+                    + $" range={alcance:F1} cameraRay->{batida}"
+                    + $" | updateProc={VR_OutlinableManager_UpdateProc_Patch.Chamadas} mouseRead={lido}"
                     + $" cursorWin={(GetCursorPos(out POINT cp) ? $"{cp.X},{cp.Y}" : "?")}"
-                    + $" tela={Screen.width}x{Screen.height} pixel={cam.pixelWidth}x{cam.pixelHeight}"
-                    + $" sobreUI={(EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())}");
+                    + $" screen={Screen.width}x{Screen.height} pixel={cam.pixelWidth}x{cam.pixelHeight}"
+                    + $" overUI={(EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())}");
 
                 // Com o cursor travado o SetCursorPos nao vale de nada: o Windows devolve o
                 // cursor para o centro e o jogo passa a ler delta, nao posicao. Se o ADV nao
@@ -759,18 +759,18 @@ namespace AmanatsuVR.VRUtils
                 var oleo = Massagem;
                 if (oleo != null)
                 {
-                    PluginLog.Info($"[AmanatsuVR][OLEO] camera='{(oleo.Camera != null ? oleo.Camera.name : "-")}'"
-                        + $" mascaraHit=0x{oleo._layerMaskHit.value:X} mascaraChara=0x{oleo._layerMaskChara.value:X}"
-                        + $" modo={oleo.NowMode} cameraMode={oleo.CameraMode} semCtrl={oleo.NoCtrlCondition}"
-                        + $" ativo={oleo.isActiveAndEnabled} init={oleo.IsInit}"
-                        + $" camAtiva={(oleo.Camera != null ? oleo.Camera.isActiveAndEnabled.ToString() : "-")}"
-                        + $" travaCursor={(oleo.CameraController != null ? oleo.CameraController.IsCursorLock.ToString() : "?")}"
-                        + $" lockState={Cursor.lockState} visivel={Cursor.visible}");
+                    PluginLog.Info($"[AmanatsuVR][OIL] camera='{(oleo.Camera != null ? oleo.Camera.name : "-")}'"
+                        + $" hitMask=0x{oleo._layerMaskHit.value:X} charaMask=0x{oleo._layerMaskChara.value:X}"
+                        + $" mode={oleo.NowMode} cameraMode={oleo.CameraMode} noCtrl={oleo.NoCtrlCondition}"
+                        + $" active={oleo.isActiveAndEnabled} init={oleo.IsInit}"
+                        + $" camActive={(oleo.Camera != null ? oleo.Camera.isActiveAndEnabled.ToString() : "-")}"
+                        + $" cursorLock={(oleo.CameraController != null ? oleo.CameraController.IsCursorLock.ToString() : "?")}"
+                        + $" lockState={Cursor.lockState} visible={Cursor.visible}");
                 }
             }
             catch (System.Exception ex)
             {
-                PluginLog.Warning($"[AmanatsuVR][ALVO] falhou: {ex.Message}");
+                PluginLog.Warning($"[AmanatsuVR][TARGET] failed: {ex.Message}");
             }
         }
 
@@ -872,7 +872,7 @@ namespace AmanatsuVR.VRUtils
                 _pressedObject = activeTarget;
                 pointerData.pressPosition = screenPos;
 
-                PluginLog.Info($"[AmanatsuVR] Trigger DOWN acionado! Alvo: '{activeTarget?.name}', pos: {screenPos}");
+                PluginLog.Info($"[AmanatsuVR] Trigger DOWN fired! Target: '{activeTarget?.name}', pos: {screenPos}");
 
                 if (activeTarget != null)
                 {
@@ -895,7 +895,7 @@ namespace AmanatsuVR.VRUtils
                         var btn = activeTarget.GetComponentInParent<UnityEngine.UI.Button>();
                         if (btn != null && btn.interactable)
                         {
-                            PluginLog.Info($"[AmanatsuVR] Botão acionado com sucesso (onClick.Invoke): '{btn.name}'");
+                            PluginLog.Info($"[AmanatsuVR] Button triggered successfully (onClick.Invoke): '{btn.name}'");
                             btn.onClick.Invoke();
                             _cliqueConsumido = true;
                             TriggerHaptic(devIndex, 1000);
@@ -905,7 +905,7 @@ namespace AmanatsuVR.VRUtils
                             var toggle = activeTarget.GetComponentInParent<UnityEngine.UI.Toggle>();
                             if (toggle != null && toggle.interactable)
                             {
-                                PluginLog.Info($"[AmanatsuVR] Toggle alternado: '{toggle.name}' -> {!toggle.isOn}");
+                                PluginLog.Info($"[AmanatsuVR] Toggle switched: '{toggle.name}' -> {!toggle.isOn}");
                                 toggle.isOn = !toggle.isOn;
                                 _cliqueConsumido = true;
                                 TriggerHaptic(devIndex, 1000);
@@ -918,7 +918,7 @@ namespace AmanatsuVR.VRUtils
                     }
                     catch (Exception ex)
                     {
-                        PluginLog.Warning($"[AmanatsuVR] Erro ao processar clique no Down: {ex.Message}");
+                        PluginLog.Warning($"[AmanatsuVR] Error handling click on Down: {ex.Message}");
                     }
                 }
                 TriggerHaptic(devIndex, 600);
@@ -963,8 +963,8 @@ namespace AmanatsuVR.VRUtils
             PointerOverInteractiveUI = clickableTarget != null || rolavel != null
                 || (currentHover != null && ExecuteEvents.GetEventHandler<IDragHandler>(currentHover) != null);
             if (IsTriggerDown && VRCharCreation.Ativo)
-                PluginLog.Info($"[AmanatsuVR][CRIACAO] clique em '{currentHover?.name}': " +
-                               (PointerOverInteractiveUI ? "UI, camera bloqueada" : "area livre, camera liberada"));
+                PluginLog.Info($"[AmanatsuVR][CREATION] click on '{currentHover?.name}': " +
+                               (PointerOverInteractiveUI ? "UI, camera blocked" : "free area, camera released"));
             return clickableTarget != null;
         }
 
@@ -1048,13 +1048,13 @@ namespace AmanatsuVR.VRUtils
                 // que nao saia deixou TODO o nosso log mudo de uma vez - porque todo limitador
                 // usava Time.time, que nao anda com timeScale=0. Agora o log sobrevive a pausa e
                 // diz qual dos dois e.
-                $"[AmanatsuVR][INPUT] escala={Time.timeScale:F2} frame={Time.frameCount}"
-                + $" dev L={leftDev} R={rightDev} | combinado L={leftTrigger} R={rightTrigger}"
-                + $" | acao L={SteamVRInput.ReadTrigger(true)} R={SteamVRInput.ReadTrigger(false)}"
+                $"[AmanatsuVR][INPUT] scale={Time.timeScale:F2} frame={Time.frameCount}"
+                + $" dev L={leftDev} R={rightDev} | combined L={leftTrigger} R={rightTrigger}"
+                + $" | action L={SteamVRInput.ReadTrigger(true)} R={SteamVRInput.ReadTrigger(false)}"
                 + $" | xr L={ReadXRDeviceTrigger(true)} R={ReadXRDeviceTrigger(false)}"
                 + $" | joy L={ReadLegacyJoystickTrigger(true)} R={ReadLegacyJoystickTrigger(false)}"
                 + $" | openvr L={ReadOpenVRTrigger(leftDev)} R={ReadOpenVRTrigger(rightDev)}"
-                + $" | apontandoUI={IsPointingAtUI} foco={Application.isFocused}"
+                + $" | pointingUI={IsPointingAtUI} focus={Application.isFocused}"
                 + $" | {SteamVRInput.Describe(true)} | {SteamVRInput.Describe(false)}");
         }
 

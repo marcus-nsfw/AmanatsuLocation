@@ -11,7 +11,7 @@ namespace AmanatsuVR.VRUtils
     //  - A garota branca nao e bug de render: acontece igual no desktop, com luz e mascara
     //    descartadas por medicao.
     //  - Causa medida: a cena de criacao e aberta SEM carta. O [FLUXO] pegou
-    //    Received(novo=True sexo=1 data=nulo) e as tres copias nulas em Initialize e em Start;
+    //    Received(new=True sex=1 data=nulo) e as tres copias nulas em Initialize e em Start;
     //    o editor entao monta um HumanData zerado, cujas cores nascem em #FFF. Por isso as
     //    paletas aparecem em branco e mexer numa cor conserta so aquela cor.
     //  - HumanData.InitializeData e HumanCustom.LoadChara NAO estao nesse caminho: patch
@@ -50,23 +50,23 @@ namespace AmanatsuVR.VRUtils
     {
         internal static void Anuncia(string onde, HumanCustom hc)
         {
-            if (hc == null) { PluginLog.Info($"[AmanatsuVR][FLUXO] {onde}: instancia nula"); return; }
+            if (hc == null) { PluginLog.Info($"[AmanatsuVR][FLOW] {onde}: null instance"); return; }
 
             var r = hc.Received;
             string recebido = r == null
                 ? "Received=null"
-                : $"Received(novo={r.ModeNew} sexo={r.ModeSex} apagaTudo={r.DeleteAll} data={Estado(r.HumanData)})";
+                : $"Received(new={r.ModeNew} sex={r.ModeSex} deleteAll={r.DeleteAll} data={Estado(r.HumanData)})";
 
-            PluginLog.Info($"[AmanatsuVR][FLUXO] {onde}: {recebido}"
-                + $" | vivo={Estado(hc.HumanData)} edicao={Estado(hc.EditHumanData)}"
-                + $" padrao={Estado(hc.DefaultData)} human={(hc.Human == null ? "nao" : "montado")}");
+            PluginLog.Info($"[AmanatsuVR][FLOW] {onde}: {recebido}"
+                + $" | live={Estado(hc.HumanData)} edit={Estado(hc.EditHumanData)}"
+                + $" default={Estado(hc.DefaultData)} human={(hc.Human == null ? "no" : "built")}");
         }
 
         private static string Estado(HumanData d)
         {
             var c = d?.Custom;
-            if (c == null || c.Body == null || c.Face == null) return "nulo";
-            return EstaVirgem(c) ? "BRANCO" : $"cor({c.Body.skinMainColor.r:0.00},{c.Body.skinMainColor.g:0.00},{c.Body.skinMainColor.b:0.00})";
+            if (c == null || c.Body == null || c.Face == null) return "null";
+            return EstaVirgem(c) ? "BLANK" : $"color({c.Body.skinMainColor.r:0.00},{c.Body.skinMainColor.g:0.00},{c.Body.skinMainColor.b:0.00})";
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace AmanatsuVR.VRUtils
             try { return CarregaCarta(sexo); }
             catch (System.Exception ex)
             {
-                PluginLog.Warning($"[AmanatsuVR][CARTA] carta padrao falhou inteira: {ex}");
+                PluginLog.Warning($"[AmanatsuVR][CARD] default card failed entirely: {ex}");
                 return null;
             }
         }
@@ -92,21 +92,21 @@ namespace AmanatsuVR.VRUtils
 
             bool ok = false;
             try { ok = d.LoadFromPreset(sexo, Flags.Default, 0); }
-            catch (System.Exception ex) { PluginLog.Warning($"[AmanatsuVR][CARTA] preset falhou: {ex.Message}"); }
-            PluginLog.Info($"[AmanatsuVR][CARTA] preset 0 (sexo={sexo}) carregado={ok} -> {Estado(d)}");
+            catch (System.Exception ex) { PluginLog.Warning($"[AmanatsuVR][CARD] preset failed: {ex.Message}"); }
+            PluginLog.Info($"[AmanatsuVR][CARD] preset 0 (sex={sexo}) loaded={ok} -> {Estado(d)}");
 
-            if (!ok || Estado(d) == "BRANCO")
+            if (!ok || Estado(d) == "BLANK")
             {
                 string caminho = System.IO.Path.GetFullPath(System.IO.Path.Combine(
                     Application.dataPath, "..", "DefaultData", "0", "chara",
                     sexo == 0 ? "male" : "female", sexo == 0 ? "AL_M_00.png" : "AL_F_00.png"));
                 try { ok = System.IO.File.Exists(caminho) && d.LoadCharaFile(caminho, Flags.Default); }
-                catch (System.Exception ex) { ok = false; PluginLog.Warning($"[AmanatsuVR][CARTA] arquivo falhou: {ex.Message}"); }
-                PluginLog.Info($"[AmanatsuVR][CARTA] disco '{caminho}' carregado={ok}"
-                    + $" erro={d._lastLoadErrorCode} -> {Estado(d)}");
+                catch (System.Exception ex) { ok = false; PluginLog.Warning($"[AmanatsuVR][CARD] file failed: {ex.Message}"); }
+                PluginLog.Info($"[AmanatsuVR][CARD] disk '{caminho}' loaded={ok}"
+                    + $" error={d._lastLoadErrorCode} -> {Estado(d)}");
             }
 
-            return (ok && Estado(d) != "BRANCO") ? d : null;
+            return (ok && Estado(d) != "BLANK") ? d : null;
         }
 
         /// <summary>Fix as tres copias; a padrao importa porque e dela que o botao de restaurar puxa.</summary>
@@ -128,12 +128,12 @@ namespace AmanatsuVR.VRUtils
             try
             {
                 bool ok = d.LoadFromPreset(sexo, Flags.Custom, 0);
-                PluginLog.Info($"[AmanatsuVR][PADRAO] {onde}/{rotulo}: branco -> preset 0"
-                    + $" (sexo={sexo}) carregado={ok} skinMain={d.Custom.Body.skinMainColor}");
+                PluginLog.Info($"[AmanatsuVR][DEFAULT] {onde}/{rotulo}: blank -> preset 0"
+                    + $" (sex={sexo}) loaded={ok} skinMain={d.Custom.Body.skinMainColor}");
             }
             catch (System.Exception ex)
             {
-                PluginLog.Warning($"[AmanatsuVR][PADRAO] {onde}/{rotulo}: preset falhou: {ex.Message}");
+                PluginLog.Warning($"[AmanatsuVR][DEFAULT] {onde}/{rotulo}: preset failed: {ex.Message}");
             }
         }
 
@@ -151,7 +151,7 @@ namespace AmanatsuVR.VRUtils
     }
 
     /// <summary>
-    /// O [FLUXO] fechou a questao: a cena entra com Received(novo=True sexo=1 data=nulo) e as tres
+    /// O [FLUXO] fechou a questao: a cena entra com Received(new=True sex=1 data=nulo) e as tres
     /// copias ainda nulas em Initialize e em Start. Ninguem deixou de carregar - o editor e mandado
     /// abrir SEM carta, e monta um HumanData zerado por conta propria. Dai as paletas em #FFF.
     ///
@@ -213,12 +213,12 @@ namespace AmanatsuVR.VRUtils
             var carta = CharDefaults.CartaPadrao(sex);
             if (carta == null)
             {
-                PluginLog.Info($"[AmanatsuVR][CARTA] sem carta para sexo={sex}; deixando o original abrir vazio");
+                PluginLog.Info($"[AmanatsuVR][CARD] no card for sex={sex}; letting the original open empty");
                 return true;
             }
 
             __instance.SetReceiver(carta, deleteAll);
-            PluginLog.Info($"[AmanatsuVR][CARTA] SetReceiver(sexo={sex}) trocado pela carta padrao");
+            PluginLog.Info($"[AmanatsuVR][CARD] SetReceiver(sex={sex}) replaced by the default card");
             return false;
         }
     }

@@ -64,20 +64,20 @@ namespace Amanatsu.Uncensor
                 var arq = Path.Combine(pasta, nome + ".bin");
                 if (!File.Exists(arq))
                 {
-                    UncensorPlugin.Logger.LogWarning($"[GEN] {arq} nao encontrado; {nome} fica o original.");
+                    UncensorPlugin.Logger.LogWarning($"[GEN] {arq} not found; {nome} stays original.");
                     continue;
                 }
                 try { _dados[nome] = Le(arq); }
-                catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[GEN] erro lendo {arq}: {ex.Message}"); }
+                catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[GEN] error reading {arq}: {ex.Message}"); }
             }
             foreach (var nome in _corposFemininos)
             {
                 var arq = Path.Combine(pasta, nome + ".bin");
                 if (!File.Exists(arq)) continue;
                 try { _completas[nome] = LeCompleta(arq); }
-                catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[GEN] erro lendo {arq}: {ex.Message}"); }
+                catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[GEN] error reading {arq}: {ex.Message}"); }
             }
-            UncensorPlugin.Logger.Info($"[GEN] {_dados.Count} pecas masculinas e {_completas.Count} corpos femininos carregados.");
+            UncensorPlugin.Logger.Info($"[GEN] {_dados.Count} male parts and {_completas.Count} female bodies loaded.");
         }
 
         private static Completa LeCompleta(string arq)
@@ -318,7 +318,7 @@ namespace Amanatsu.Uncensor
         }
 
         /// <summary>Depois do LateUpdate do LookAtPenis: no oral ele reposiciona a genital, entao o alongamento vem de novo.</summary>
-        internal static void ReaplicaAlongamento() => AlongaPenis();
+        internal static void ReaplicaAlongamento() { if (!OtherUncensor) AlongaPenis(); }
 
 
         // F9 also traces the penis frame by frame for a few seconds: a single capture showed it inside, the
@@ -330,9 +330,9 @@ namespace Amanatsu.Uncensor
         {
             if (Time.unscaledTime > _traceUntil) return;
             float r = p.Repouso;
-            UncensorPlugin.Logger.Info($"[GEN][TRACE] f{Time.frameCount} {mode} lado {new Vector2(vl.x, vl.y).magnitude / r:F2}"
-                + $" entrada {vl.z / r:F2} anim {zAnim / r:F2} alvo {alvo / r:F2} ponta {p.Ponta.localPosition.z / r:F2}"
-                + $" aim {(p.Aimed ? Quaternion.Angle(p.RotBase, p.RotWritten) : 0f):F0}deg (comprimentos do penis)");
+            UncensorPlugin.Logger.Info($"[GEN][TRACE] f{Time.frameCount} {mode} side {new Vector2(vl.x, vl.y).magnitude / r:F2}"
+                + $" entrance {vl.z / r:F2} anim {zAnim / r:F2} target {alvo / r:F2} tip {p.Ponta.localPosition.z / r:F2}"
+                + $" aim {(p.Aimed ? Quaternion.Angle(p.RotBase, p.RotWritten) : 0f):F0}deg (penis lengths)");
         }
 
         private static void AlongaPenis()
@@ -365,7 +365,7 @@ namespace Amanatsu.Uncensor
                         p.Escrito = float.NaN;
                     }
                     p.NaBoca = boca;
-                    UncensorPlugin.Logger.Info($"[GEN] penis {(boca ? $"na boca: comprimento x{(MouthLength != null ? MouthLength.Value : 1.35f):F2}" : "fora da boca")}");
+                    UncensorPlugin.Logger.Info($"[GEN] penis {(boca ? $"in mouth: length x{(MouthLength != null ? MouthLength.Value : 1.35f):F2}" : "outside mouth")}");
                 }
                 // Vagina: comprimento inteiro ate a ponta passar dMax (fracao do comprimento) da entrada;
                 // so dai o encurtamento da animacao aparece (Marcus: "a profundidade maxima primeiro, so
@@ -637,9 +637,9 @@ namespace Amanatsu.Uncensor
                         repouso = ((Vector3)bp[i9].inverse.GetColumn(3) - (Vector3)bp[i1].inverse.GetColumn(3)).magnitude;
                 }
                 if (repouso > 0f) _penis.Add(new Penis { Ponta = ponta, Repouso = repouso, CabecaDono = cabeca, Raiz = dan, Malha = rDan });
-                UncensorPlugin.Logger.Info($"[GEN] penis: comprimento de repouso dan101->dan109 {repouso:F3}");
+                UncensorPlugin.Logger.Info($"[GEN] penis: rest length dan101->dan109 {repouso:F3}");
             }
-            UncensorPlugin.Logger.Info($"[GEN] {raiz.name}: {n} capsulas (dedos/penis); {_ossosVulva.Count} ossos de vulva ativos.");
+            UncensorPlugin.Logger.Info($"[GEN] {raiz.name}: {n} capsules (fingers/penis); {_ossosVulva.Count} active vulva bones.");
         }
 
         private static void AplicaLocal(Transform t, Matrix4x4 m)
@@ -693,14 +693,14 @@ namespace Amanatsu.Uncensor
             {
                 if (p.Raiz == null || p.Ponta == null) continue;
                 var raiz = p.Raiz.parent != null ? p.Raiz.parent : p.Raiz;
-                UncensorPlugin.Logger.Info($"[GEN][CADEIA] raiz '{raiz.name}' escala mundo {raiz.lossyScale} | repouso dan101->109 {p.Repouso:F3}"
+                UncensorPlugin.Logger.Info($"[GEN][CHAIN] root '{raiz.name}' world scale {raiz.lossyScale} | rest dan101->109 {p.Repouso:F3}"
                     + $" | real {Vector3.Distance(p.Raiz.position, p.Ponta.position) / Mathf.Max(1e-6f, p.Raiz.lossyScale.z):F3}");
                 foreach (var t in raiz.GetComponentsInChildren<Transform>(true))
                 {
                     if (!t.name.StartsWith("cf_j_dan") && !t.name.StartsWith("cf_s_dan")) continue;
-                    UncensorPlugin.Logger.Info($"[GEN][CADEIA]   {t.name} pai={(t.parent != null ? t.parent.name : "-")}"
-                        + $" pos={t.localPosition.ToString("F3")} rot={t.localEulerAngles.ToString("F0")} escala={t.localScale.ToString("F3")}"
-                        + $" dist-raiz={Vector3.Distance(raiz.position, t.position) / Mathf.Max(1e-6f, raiz.lossyScale.z):F3}");
+                    UncensorPlugin.Logger.Info($"[GEN][CHAIN]   {t.name} parent={(t.parent != null ? t.parent.name : "-")}"
+                        + $" pos={t.localPosition.ToString("F3")} rot={t.localEulerAngles.ToString("F0")} scale={t.localScale.ToString("F3")}"
+                        + $" dist-root={Vector3.Distance(raiz.position, t.position) / Mathf.Max(1e-6f, raiz.lossyScale.z):F3}");
                 }
 
                 // MEDIDO: os tres ossos acima em repouso e a malha com menos da metade do comprimento. Entao a
@@ -716,14 +716,14 @@ namespace Amanatsu.Uncensor
                     if (bw.boneIndex2 < peso.Length) peso[bw.boneIndex2] += bw.weight2;
                     if (bw.boneIndex3 < peso.Length) peso[bw.boneIndex3] += bw.weight3;
                 }
-                UncensorPlugin.Logger.Info($"[GEN][MALHA] '{m.name}': {ossos.Length} ossos, {m.vertexCount} vertices, rootBone={(p.Malha.rootBone != null ? p.Malha.rootBone.name : "-")}");
+                UncensorPlugin.Logger.Info($"[GEN][MESH] '{m.name}': {ossos.Length} bones, {m.vertexCount} vertices, rootBone={(p.Malha.rootBone != null ? p.Malha.rootBone.name : "-")}");
                 for (int i = 0; i < ossos.Length; i++)
                 {
                     if (peso[i] < 0.5f) continue;
                     var t = ossos[i];
-                    if (t == null) { UncensorPlugin.Logger.Info($"[GEN][MALHA]   [{i}] NULO peso {peso[i]:F0}"); continue; }
-                    UncensorPlugin.Logger.Info($"[GEN][MALHA]   [{i}] {t.name} peso {peso[i]:F0} pai={(t.parent != null ? t.parent.name : "-")}"
-                        + $" pos={t.localPosition.ToString("F3")} escala={t.localScale.ToString("F3")} mundo={t.position.ToString("F2")}");
+                    if (t == null) { UncensorPlugin.Logger.Info($"[GEN][MESH]   [{i}] NULL weight {peso[i]:F0}"); continue; }
+                    UncensorPlugin.Logger.Info($"[GEN][MESH]   [{i}] {t.name} weight {peso[i]:F0} parent={(t.parent != null ? t.parent.name : "-")}"
+                        + $" pos={t.localPosition.ToString("F3")} scale={t.localScale.ToString("F3")} world={t.position.ToString("F2")}");
                 }
             }
         }
@@ -734,7 +734,7 @@ namespace Amanatsu.Uncensor
             {
                 _ultimoFrameCaptura = Time.frameCount;
                 _capturas++;
-                UncensorPlugin.Logger.Info($"[GEN] captura {_capturas}: QualitySettings.skinWeights={QualitySettings.skinWeights}");
+                UncensorPlugin.Logger.Info($"[GEN] capture {_capturas}: QualitySettings.skinWeights={QualitySettings.skinWeights}");
                 LogCadeiaPenis();
             }
             var o = h.GetRefObject(Table.RefObjKey.ObjBody);
@@ -771,7 +771,7 @@ namespace Amanatsu.Uncensor
                 base_ += vs.Length;
                 UnityEngine.Object.Destroy(m);
             }
-            UncensorPlugin.Logger.Info($"[GEN] captura gravada: {arq}");
+            UncensorPlugin.Logger.Info($"[GEN] capture saved: {arq}");
             // estado da fisica da vulva neste frame (diagnostico: deslocamento sem contato)
             foreach (var ov in _ossosVulva)
             {
@@ -780,9 +780,9 @@ namespace Amanatsu.Uncensor
                 var p0 = ov.Pivo.TransformPoint(ov.Repouso);
                 foreach (var cp in _capsulas)
                     if (cp.A != null) perto = Mathf.Min(perto, (cp.A.position - p0).magnitude);
-                UncensorPlugin.Logger.Info($"[GEN]   {ov.Osso.name}: local-repouso {(ov.Osso.localPosition - ov.Repouso).magnitude:F4}, " +
-                    $"empurrao {ov.Atual.magnitude:F4}, capsula mais perto {perto:F3}, escala pivo {ov.Pivo.lossyScale.x:F3}, " +
-                    $"pai {ov.Pivo.parent.name} escala local {ov.Pivo.parent.localScale.x:F3}");
+                UncensorPlugin.Logger.Info($"[GEN]   {ov.Osso.name}: local-rest {(ov.Osso.localPosition - ov.Repouso).magnitude:F4}, " +
+                    $"push {ov.Atual.magnitude:F4}, nearest capsule {perto:F3}, pivot scale {ov.Pivo.lossyScale.x:F3}, " +
+                    $"parent {ov.Pivo.parent.name} local scale {ov.Pivo.parent.localScale.x:F3}");
             }
             // anus: entrance center, closest capsule segments to it and the opening they give
             foreach (var kv in _anusCenters)
@@ -801,21 +801,52 @@ namespace Amanatsu.Uncensor
                     lines.Add((dist, $"{c.A.name}->{c.B.name}{(c.Estende ? "+" : "")} dist {dist:F3} t {tt:F2} raio {r:F3} abre {r + AnusReach * Mathf.Abs(kv.Key.lossyScale.x) - dist:F3}{(vis ? "" : " (oculta)")}"));
                 }
                 lines.Sort((x, y) => x.Item1.CompareTo(y.Item1));
-                UncensorPlugin.Logger.Info($"[GEN] anus {kv.Key.name} centro {center}:");
+                UncensorPlugin.Logger.Info($"[GEN] anus {kv.Key.name} center {center}:");
                 for (int i = 0; i < Mathf.Min(5, lines.Count); i++) UncensorPlugin.Logger.Info($"[GEN]   {lines[i].Item2}");
             }
+        }
+
+        // Another uncensor owns the genitals: ours (meshes, bone rebinding, vulva/anus bones, penis stretch and aim,
+        // collision) stays off so the two do not fight over the same SkinnedMeshRenderers and bones. Mosaic removal
+        // and Freemode are not affected. Checked lazily: during our Load() the plugins after us are not loaded yet.
+        private static bool? _otherUncensor;
+        private static readonly System.Text.RegularExpressions.Regex OtherUncensorName = new System.Text.RegularExpressions.Regex(
+            @"(^|[^a-z])al[_.\- ]?uncensor|uncensorselector", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        internal static bool OtherUncensor => _otherUncensor ??= DetectOtherUncensor();
+
+        private static bool DetectOtherUncensor()
+        {
+            var seen = new List<string>();
+            try
+            {
+                foreach (var kv in BepInEx.Unity.IL2CPP.IL2CPPChainloader.Instance.Plugins)
+                {
+                    var info = kv.Value;
+                    if (info?.Metadata == null || info.Metadata.GUID == UncensorPlugin.PluginGuid) continue;
+                    string id = $"{info.Metadata.GUID} | {info.Metadata.Name} | {System.IO.Path.GetFileName(info.Location ?? "")}";
+                    seen.Add(id);
+                    if (!OtherUncensorName.IsMatch(id)) continue;
+                    UncensorPlugin.Logger.LogWarning($"[GEN] other uncensor detected ({id}): Amanatsu 3D genitals, bones and collision turned off.");
+                    return true;
+                }
+            }
+            catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[GEN] other-uncensor detection failed: {ex.Message}"); }
+            UncensorPlugin.Logger.Info($"[GEN] no other uncensor; plugins: {string.Join("; ", seen)}");
+            return false;
         }
 
         /// <summary>Chamado por frame pelo LateUpdate do Human; varre no maximo 1x por segundo por personagem.</summary>
         internal static void Aplica(Human h)
         {
             if (_dados.Count == 0 && _completas.Count == 0) return;
+            if (OtherUncensor) return;
             try { if (Input.GetKeyDown(KeyCode.F9)) { Captura(h); _traceUntil = Time.unscaledTime + TraceSeconds; } }
-            catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[GEN] captura F9 falhou: {ex.Message}"); }
+            catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[GEN] F9 capture failed: {ex.Message}"); }
             try { AtualizaFisica(); }
-            catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[GEN] fisica falhou: {ex.Message}"); }
+            catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[GEN] physics failed: {ex.Message}"); }
             try { VulvaCoberta(h); }
-            catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[GEN] calcinha falhou: {ex.Message}"); }
+            catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[GEN] panties failed: {ex.Message}"); }
             var chave = h.Pointer;
             if (_proximaVarredura.TryGetValue(chave, out var quando) && Time.frameCount < quando) return;
             _proximaVarredura[chave] = Time.frameCount + 60;
@@ -836,7 +867,7 @@ namespace Amanatsu.Uncensor
             if (_completas.Count > 0)
             {
                 try { CriaColisores(h, smrs); }
-                catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[GEN] colisores falharam: {ex.Message}"); }
+                catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[GEN] colliders failed: {ex.Message}"); }
             }
 
             Material pele = null;
@@ -850,7 +881,7 @@ namespace Amanatsu.Uncensor
             {
                 var nomes = new List<string>();
                 foreach (var r in smrs) if (r.sharedMesh != null) nomes.Add(r.sharedMesh.name);
-                UncensorPlugin.Logger.Info($"[GEN] {corpo.name}: pele={(pele != null ? pele.name : "nenhuma")}, malhas=[{string.Join(", ", nomes)}]");
+                UncensorPlugin.Logger.Info($"[GEN] {corpo.name}: skin={(pele != null ? pele.name : "none")}, meshes=[{string.Join(", ", nomes)}]");
             }
 
             foreach (var smr in smrs)
@@ -872,7 +903,7 @@ namespace Amanatsu.Uncensor
                         var ossosOrig = smr.bones;
                         if (comp.Ossos.Length > 0 && !LigaOssos(smr, comp, orig.bindposes))
                         {
-                            UncensorPlugin.Logger.LogWarning($"[GEN] {orig.name}: ossos da vulva nao ligaram; mantendo original.");
+                            UncensorPlugin.Logger.LogWarning($"[GEN] {orig.name}: vulva bones did not link; keeping original.");
                             continue;
                         }
                         _trocas[smr.GetInstanceID()] = new Troca
@@ -880,9 +911,9 @@ namespace Amanatsu.Uncensor
                             Smr = smr, Dono = h.Pointer, Orig = orig, Nova = novaC, OssosOrig = ossosOrig, OssosNova = smr.bones,
                         };
                         smr.bones = ossosOrig;
-                        UncensorPlugin.Logger.Info($"[GEN] {orig.name} pronto (vulva 3D, {comp.V.Length} vertices, {comp.Ossos.Length} ossos).");
+                        UncensorPlugin.Logger.Info($"[GEN] {orig.name} ready (3D vulva, {comp.V.Length} vertices, {comp.Ossos.Length} bones).");
                     }
-                    catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[GEN] falha trocando {orig.name}: {ex.Message}"); }
+                    catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[GEN] failed swapping {orig.name}: {ex.Message}"); }
                     continue;
                 }
 
@@ -897,9 +928,9 @@ namespace Amanatsu.Uncensor
                     }
                     smr.sharedMesh = nova;
                     if (pele != null) smr.sharedMaterial = pele;
-                    UncensorPlugin.Logger.Info($"[GEN] {orig.name} trocado ({d.V.Length} vertices).");
+                    UncensorPlugin.Logger.Info($"[GEN] {orig.name} swapped ({d.V.Length} vertices).");
                 }
-                catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[GEN] falha trocando {orig.name}: {ex.Message}"); }
+                catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[GEN] failed swapping {orig.name}: {ex.Message}"); }
             }
 
             TiraRoupaDeBaixo(h, smrs);
@@ -945,7 +976,7 @@ namespace Amanatsu.Uncensor
                 // bones antes da malha na ida, depois na volta: a contagem sempre bate com os bindposes
                 if (coberta) { t.Smr.sharedMesh = quer; t.Smr.bones = t.OssosOrig; }
                 else { t.Smr.bones = t.OssosNova; t.Smr.sharedMesh = quer; }
-                UncensorPlugin.Logger.Info($"[GEN] {t.Orig.name}: calcinha {(coberta ? "vestida, vulva escondida" : "fora, vulva visivel")}.");
+                UncensorPlugin.Logger.Info($"[GEN] {t.Orig.name}: panties {(coberta ? "on, vulva hidden" : "off, vulva visible")}.");
             }
             foreach (var k in _mortas) _trocas.Remove(k);
             if (!coberta) MostraQuadril(h);
@@ -986,14 +1017,14 @@ namespace Amanatsu.Uncensor
                     if (par.Key.StartsWith("o_") && !par.Key.StartsWith("o_nail"))
                         partes.Add($"{par.Key}[{(par.Value.sharedMesh != null ? par.Value.sharedMesh.name : "SEM MALHA")}](obj={par.Value.gameObject.activeSelf}/{par.Value.gameObject.activeInHierarchy} " +
                                    $"rend={par.Value.enabled} pai={par.Value.transform.parent?.name})");
-                UncensorPlugin.Logger.Info($"[GEN] corpo: {estado} | {string.Join(", ", partes)}");
+                UncensorPlugin.Logger.Info($"[GEN] body: {estado} | {string.Join(", ", partes)}");
             }
             if (cima == null || temBaixo) return;
             if (!malhas.TryGetValue(cima.Replace("upper", "lower"), out baixo)
                 && !malhas.TryGetValue("o_lower_type01", out baixo)) return;
             for (var o = baixo.transform; o != null && !baixo.gameObject.activeInHierarchy; o = o.parent) o.gameObject.SetActive(true);
             baixo.enabled = true;
-            UncensorPlugin.Logger.Info($"[GEN] quadril escondido pela roupa sem calcinha: {baixo.name} religado.");
+            UncensorPlugin.Logger.Info($"[GEN] hip hidden by clothing without panties: {baixo.name} re-enabled.");
         }
 
         private static readonly Dictionary<int, bool> _penisVisivelAntes = new Dictionary<int, bool>();
@@ -1023,9 +1054,9 @@ namespace Amanatsu.Uncensor
                 if (roupa == null) return;
                 roupa.SetClothesState(HumanCloth.Define.ClothesKind.Bot, HumanCloth.Define.ClothesState.Naked);
                 roupa.SetClothesState(HumanCloth.Define.ClothesKind.Shorts, HumanCloth.Define.ClothesState.Naked);
-                UncensorPlugin.Logger.Info("[GEN] penis visivel: calca e cueca tiradas.");
+                UncensorPlugin.Logger.Info("[GEN] penis visible: pants and underwear removed.");
             }
-            catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[GEN] tirar roupa de baixo falhou: {ex.Message}"); }
+            catch (Exception ex) { UncensorPlugin.Logger.LogWarning($"[GEN] removing bottom clothing failed: {ex.Message}"); }
         }
 
         private static Mesh Monta(Dados d, Mesh orig, SkinnedMeshRenderer smr)
@@ -1040,7 +1071,7 @@ namespace Amanatsu.Uncensor
                     if (bones[j] != null && bones[j].name == d.Ossos[i]) { mapa[i] = j; break; }
                 if (mapa[i] < 0)
                 {
-                    UncensorPlugin.Logger.LogWarning($"[GEN] {orig.name}: bone {d.Ossos[i]} nao existe neste corpo; mantendo original.");
+                    UncensorPlugin.Logger.LogWarning($"[GEN] {orig.name}: bone {d.Ossos[i]} does not exist in this body; keeping original.");
                     return null;
                 }
             }

@@ -19,12 +19,12 @@ namespace AmanatsuVR.VRUtils
                     if (bytes != null && bytes.Length > 0)
                     {
                         Bundle = AssetBundle.LoadFromMemory(bytes);
-                        PluginLog.Info("[AmanatsuVR] AssetBundle customizado de shaders VR carregado com sucesso!");
+                        PluginLog.Info("[AmanatsuVR] Custom VR shader AssetBundle loaded successfully!");
                     }
                 }
                 catch (System.Exception ex)
                 {
-                    PluginLog.Warning($"[AmanatsuVR] Não foi possível carregar custom_asset_bundle embutido: {ex.Message}");
+                    PluginLog.Warning($"[AmanatsuVR] Could not load embedded custom_asset_bundle: {ex.Message}");
                 }
             }
             return Bundle;
@@ -99,10 +99,10 @@ namespace AmanatsuVR.VRUtils
             // certos. A diferença é a RenderTexture: se ela vier como array (o display XR está
             // em Texture2DArray) o shader amostra como Texture2D e o resultado é magenta.
             var rt = texture as RenderTexture;
-            PluginLog.Info($"[AmanatsuVR][MAT] painel shader='{shader?.name}' suportado={shader?.isSupported}"
-                + $" passes={material.passCount} fila={material.renderQueue}"
-                + $" | textura='{texture?.name}' tipo={texture?.GetType().Name} dimensao={texture?.dimension}"
-                + (rt != null ? $" volumeDepth={rt.volumeDepth} criada={rt.IsCreated()} formato={rt.graphicsFormat}" : ""));
+            PluginLog.Info($"[AmanatsuVR][MAT] panel shader='{shader?.name}' supported={shader?.isSupported}"
+                + $" passes={material.passCount} queue={material.renderQueue}"
+                + $" | texture='{texture?.name}' type={texture?.GetType().Name} dimension={texture?.dimension}"
+                + (rt != null ? $" volumeDepth={rt.volumeDepth} created={rt.IsCreated()} format={rt.graphicsFormat}" : ""));
             return material;
         }
 
@@ -157,7 +157,7 @@ namespace AmanatsuVR.VRUtils
             mat.SetInt("_Cull", (int)UnityEngine.Rendering.CullMode.Off);
             DisableDepthPasses(mat);
 
-            PluginLog.Info($"[AmanatsuVR] CreateLaserMaterial criado com shader '{shader?.name}' (cor={color})");
+            PluginLog.Info($"[AmanatsuVR] CreateLaserMaterial created with shader '{shader?.name}' (color={color})");
             return mat;
         }
 

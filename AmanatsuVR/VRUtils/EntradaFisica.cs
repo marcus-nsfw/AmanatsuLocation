@@ -104,7 +104,7 @@ namespace AmanatsuVR.VRUtils
                 keybd_event(VK_MENU, 0, 0, System.IntPtr.Zero);
                 bool ok = SetForegroundWindow(h);
                 keybd_event(VK_MENU, 0, KEYEVENTF_KEYUP, System.IntPtr.Zero);
-                AmanatsuVR.Logging.PluginLog.Info($"[AmanatsuVR][FOCO] {motivo}: janela trazida para frente ok={ok}");
+                AmanatsuVR.Logging.PluginLog.Info($"[AmanatsuVR][FOCUS] {motivo}: window brought to front ok={ok}");
                 return ok;
             }
             catch { return false; }

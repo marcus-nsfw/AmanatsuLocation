@@ -35,12 +35,12 @@ namespace Amanatsu.Uncensor
 
                 if (alvo == null)
                 {
-                    UncensorPlugin.Logger.LogWarning("[TOS] TryConnectTOSServerAsync nao encontrado; nada pulado.");
+                    UncensorPlugin.Logger.LogWarning("[TOS] TryConnectTOSServerAsync not found; nothing skipped.");
                     return;
                 }
 
                 harmony.Patch(alvo, prefix: new HarmonyMethod(typeof(TosSkip), nameof(SkipConnect)));
-                UncensorPlugin.Logger.Info("[TOS] acesso ao servidor de termos pulado (desvio de desenvolvimento).");
+                UncensorPlugin.Logger.Info("[TOS] terms server access skipped (development bypass).");
 
                 // O Player.log nomeou o ponto que estoura de verdade: a funcao local
                 // <TryConnectLicenceAgreementAsync>g__CheckVersionAsync|0, que no interop virou
@@ -51,16 +51,16 @@ namespace Amanatsu.Uncensor
 
                 if (versao == null)
                 {
-                    UncensorPlugin.Logger.LogWarning("[TOS] CheckVersionAsync nao encontrado; a queda no Title continua.");
+                    UncensorPlugin.Logger.LogWarning("[TOS] CheckVersionAsync not found; the drop at Title continues.");
                     return;
                 }
 
                 harmony.Patch(versao, prefix: new HarmonyMethod(typeof(TosSkip), nameof(SkipVersionCheck)));
-                UncensorPlugin.Logger.Info("[TOS] checagem de versao dos termos pulada.");
+                UncensorPlugin.Logger.Info("[TOS] terms version check skipped.");
             }
             catch (Exception ex)
             {
-                UncensorPlugin.Logger.LogWarning($"[TOS] nao consegui pular o acesso: {ex.Message}");
+                UncensorPlugin.Logger.LogWarning($"[TOS] could not skip the access: {ex.Message}");
             }
         }
 

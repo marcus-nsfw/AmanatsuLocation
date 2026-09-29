@@ -20,13 +20,13 @@ namespace Amanatsu.Uncensor
         public override void Load()
         {
             Logger = Log;
-            Logger.Info("Amanatsu Uncensor Plugin inicializando...");
+            Logger.Info("Amanatsu Uncensor Plugin initializing...");
 
             try
             {
                 var harmony = new Harmony(PluginGuid);
                 harmony.PatchAll(typeof(UncensorPlugin));
-                Logger.Info("Hooks de uncensor em tempo real aplicados com sucesso!");
+                Logger.Info("Real-time uncensor hooks applied successfully!");
                 TosSkip.Aplica(harmony);
                 Freemode.Aplica(harmony);
                 Genitais.ExtraDepth = Config.Bind("Genitals", "ExtraDepth", 0.15f,
@@ -51,7 +51,7 @@ namespace Amanatsu.Uncensor
             }
             catch (Exception ex)
             {
-                Logger.LogError($"Erro ao aplicar hooks do Uncensor: {ex}");
+                Logger.LogError($"Error applying Uncensor hooks: {ex}");
             }
         }
 
@@ -65,7 +65,7 @@ namespace Amanatsu.Uncensor
         public static void LookAtPenis_LateUpdate_Postfix()
         {
             try { Genitais.ReaplicaAlongamento(); }
-            catch (Exception ex) { Logger.LogWarning($"[GEN] alongamento apos LookAtPenis: {ex.Message}"); }
+            catch (Exception ex) { Logger.LogWarning($"[GEN] stretch after LookAtPenis: {ex.Message}"); }
         }
 
         [HarmonyPatch(typeof(Human), nameof(Human.LateUpdate))]
@@ -82,6 +82,9 @@ namespace Amanatsu.Uncensor
                 {
                     mozObj.SetActive(false);
                 }
+
+                // the other uncensor sets its own genital materials: only the mosaic toggle above stays ours
+                if (Genitais.OtherUncensor) return;
 
                 var bodyObj = __instance.GetRefObject(Table.RefObjKey.ObjBody);
                 if (bodyObj == null) return;

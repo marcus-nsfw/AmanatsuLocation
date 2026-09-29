@@ -265,7 +265,7 @@ namespace AmanatsuVR.VRUtils
                     mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                     mr.receiveShadows = false;
                 }
-                catch (Exception ex) { PluginLog.Warning($"[AmanatsuVR][H] fade nao criado: {ex.Message}"); return; }
+                catch (Exception ex) { PluginLog.Warning($"[AmanatsuVR][H] fade not created: {ex.Message}"); return; }
             }
             _fadeDesde = Time.unscaledTime;
             _fadeObj.SetActive(true);
@@ -301,13 +301,13 @@ namespace AmanatsuVR.VRUtils
                     if (l == null || !l.enabled) return;
                     l.enabled = false;
                     _miraSuspensa = l;
-                    PluginLog.Info("[AmanatsuVR][H][PUT] mira automatica da genital (LookAtPenis) suspensa.");
+                    PluginLog.Info("[AmanatsuVR][H][PUT] genital auto-aim (LookAtPenis) suspended.");
                 }
                 else if (_miraSuspensa != null)
                 {
                     _miraSuspensa.enabled = true;
                     _miraSuspensa = null;
-                    PluginLog.Info("[AmanatsuVR][H][PUT] mira automatica da genital devolvida ao jogo.");
+                    PluginLog.Info("[AmanatsuVR][H][PUT] genital auto-aim handed back to the game.");
                 }
             }
             catch { _miraSuspensa = null; }
@@ -336,8 +336,8 @@ namespace AmanatsuVR.VRUtils
                 dir.y = 0f;
                 if (dir.sqrMagnitude < 1e-4f) { dir = -raiz.forward; dir.y = 0f; }
                 _afastamento = dir.normalized * (PluginConfig.HAimManBackOff.Value * Escala(homem));
-                PluginLog.Info($"[AmanatsuVR][H][PUT] homem recuado {PluginConfig.HAimManBackOff.Value:F2} m"
-                    + $" ({_afastamento.Value.magnitude:F2} unidades) para mirar");
+                PluginLog.Info($"[AmanatsuVR][H][PUT] man moved back {PluginConfig.HAimManBackOff.Value:F2} m"
+                    + $" ({_afastamento.Value.magnitude:F2} units) to aim");
             }
             raiz.position += _afastamento.Value;
         }
@@ -401,8 +401,8 @@ namespace AmanatsuVR.VRUtils
                     break;
                 }
             }
-            catch (Exception ex) { PluginLog.Warning($"[AmanatsuVR][H] repouso da genital: {ex.Message}"); }
-            PluginLog.Info($"[AmanatsuVR][H] genital: {_genitalRepouso.Count} ossos com comprimento de repouso");
+            catch (Exception ex) { PluginLog.Warning($"[AmanatsuVR][H] genital rest: {ex.Message}"); }
+            PluginLog.Info($"[AmanatsuVR][H] genital: {_genitalRepouso.Count} bones with rest length");
             return _genitalRepouso;
         }
 
@@ -413,7 +413,7 @@ namespace AmanatsuVR.VRUtils
 
         private void Entrou(HScene hs)
         {
-            PluginLog.Info("[AmanatsuVR][H] cena H detectada: camera livre.");
+            PluginLog.Info("[AmanatsuVR][H] H scene detected: free camera.");
             _modo = Modo.Livre;
             _livreIniciada = false;
             _livreMovida = false;
@@ -424,7 +424,7 @@ namespace AmanatsuVR.VRUtils
 
         private void Saiu()
         {
-            PluginLog.Info("[AmanatsuVR][H] cena H encerrada.");
+            PluginLog.Info("[AmanatsuVR][H] H scene ended.");
             SoltaTiro();
             MostraCabeca();
             _ossosCabeca.Clear();
@@ -489,7 +489,7 @@ namespace AmanatsuVR.VRUtils
                 m.ClickConsumido = true;
                 _auto = !_auto;
                 if (_auto) { _fase = Fase.Iniciar; _faseDesde = Time.unscaledTime; }
-                PluginLog.Info($"[AmanatsuVR][H] automatico={_auto}");
+                PluginLog.Info($"[AmanatsuVR][H] auto={_auto}");
                 AvisaAuto(_auto);
             }
             if (!m.Clique && m.CliqueAntes && !m.ClickConsumido)
@@ -528,7 +528,7 @@ namespace AmanatsuVR.VRUtils
                     && Time.unscaledTime - m.SegurandoDesde >= PluginConfig.HHoldTime.Value)
                 {
                     m.SeguraConsumida = true;
-                    _atorMulher = !_atorMulher; _yawRef = float.NaN; MostraCabeca(); PluginLog.Info($"[AmanatsuVR][H] primeira pessoa: {(_atorMulher ? "mulher" : "homem")}");
+                    _atorMulher = !_atorMulher; _yawRef = float.NaN; MostraCabeca(); PluginLog.Info($"[AmanatsuVR][H] first person: {(_atorMulher ? "woman" : "man")}");
                     Vibra(m, 0.15f);
                 }
             }
@@ -554,7 +554,7 @@ namespace AmanatsuVR.VRUtils
         {
             if (!_auto) return;
             _auto = false;
-            PluginLog.Info("[AmanatsuVR][H] automatico desligado por atalho manual.");
+            PluginLog.Info("[AmanatsuVR][H] auto turned off by manual shortcut.");
             AvisaAuto(false);
         }
 
@@ -642,7 +642,7 @@ namespace AmanatsuVR.VRUtils
                 MostraCabeca();
             }
             _modo = novo;
-            PluginLog.Info($"[AmanatsuVR][H] modo={novo}{(novo == Modo.PrimeiraPessoa ? (_atorMulher ? " (mulher)" : " (homem)") : "")}");
+            PluginLog.Info($"[AmanatsuVR][H] mode={novo}{(novo == Modo.PrimeiraPessoa ? (_atorMulher ? " (woman)" : " (man)") : "")}");
         }
 
         private HActor Ator(bool mulher)
@@ -685,7 +685,7 @@ namespace AmanatsuVR.VRUtils
             if (_ossosCabeca.TryGetValue(raiz.Pointer, out var c) && c.pescoco != null) return c;
             c = (Osso(a, "cf_j_neck"), Osso(a, "cf_j_head"));
             _ossosCabeca[raiz.Pointer] = c;
-            PluginLog.Info($"[AmanatsuVR][H] ossos de '{a.Human.GameObject?.name}': pescoco={(c.pescoco != null)} cabeca={(c.cabeca != null)}");
+            PluginLog.Info($"[AmanatsuVR][H] bones of '{a.Human.GameObject?.name}': neck={(c.pescoco != null)} head={(c.cabeca != null)}");
             return c;
         }
 
@@ -751,7 +751,7 @@ namespace AmanatsuVR.VRUtils
             var p = Osso(a, "cf_j_neck");
             if (q != null && p != null) e = Mathf.Clamp(Vector3.Distance(q.position, p.position) / 0.5f, 0.1f, 100f);
             _escalas[chave] = e;
-            PluginLog.Info($"[AmanatsuVR][H] escala de '{a.Human.GameObject?.name}': 1 m = {e:F2} unidades");
+            PluginLog.Info($"[AmanatsuVR][H] scale of '{a.Human.GameObject?.name}': 1 m = {e:F2} units");
             return e;
         }
 
@@ -798,8 +798,8 @@ namespace AmanatsuVR.VRUtils
             }
             catch (Exception ex) { origem = ex.Message; }
             _entreOlhos[chave] = v;
-            PluginLog.Info($"[AmanatsuVR][H] entre os olhos de '{ator.Human.GameObject?.name}': {origem}"
-                + $"{(v.HasValue ? "" : " -> usa deslocamento fixo")}");
+            PluginLog.Info($"[AmanatsuVR][H] between the eyes of '{ator.Human.GameObject?.name}': {origem}"
+                + $"{(v.HasValue ? "" : " -> uses fixed offset")}");
             return v;
         }
 
@@ -914,9 +914,9 @@ namespace AmanatsuVR.VRUtils
                     _colisores.Add((t, t.parent, t.localPosition, t.localRotation, t.localScale));
                     t.SetParent(_cabecaFisica, true);
                 }
-                PluginLog.Info($"[AmanatsuVR][H] cabeca escondida; {_colisores.Count} colisores da cabeca mantidos no tamanho real");
+                PluginLog.Info($"[AmanatsuVR][H] head hidden; {_colisores.Count} head colliders kept at real size");
             }
-            catch (Exception ex) { PluginLog.Warning($"[AmanatsuVR][H] colisores da cabeca: {ex.Message}"); }
+            catch (Exception ex) { PluginLog.Warning($"[AmanatsuVR][H] head colliders: {ex.Message}"); }
         }
 
         private void MostraCabeca()
@@ -972,21 +972,21 @@ namespace AmanatsuVR.VRUtils
             if (EmRepouso(ctrl))
             {
                 // Na insercao sao dois degraus, como no mouse: Idle -> Insert -> InsertIdle -> loop.
-                PluginLog.Info($"[AmanatsuVR][H] iniciar: roda do mouse (estado={estado} foco={Application.isFocused})");
+                PluginLog.Info($"[AmanatsuVR][H] start: mouse wheel (state={estado} focus={Application.isFocused})");
                 EntradaFisica.Roda(1);
                 return;
             }
             // Transicao (Insert, orgasmo, Put...): nem roda nem forte, senao um segundo toque
             // durante a insercao ligava o forte antes de o vaivem comecar.
-            if (!EmMovimento(ctrl)) { PluginLog.Info($"[AmanatsuVR][H] iniciar/forte ignorado em transicao (estado={estado})"); return; }
+            if (!EmMovimento(ctrl)) { PluginLog.Info($"[AmanatsuVR][H] start/strong ignored during transition (state={estado})"); return; }
 
             bool atacado = true;
             try { atacado = ctrl.IsAttacked; } catch { }
-            if (atacado) { PluginLog.Info($"[AmanatsuVR][H] forte ja ativo (estado={estado})"); return; }
+            if (atacado) { PluginLog.Info($"[AmanatsuVR][H] strong already active (state={estado})"); return; }
 
             Selectable botao = null;
             try { botao = hs.Option._buttonAttack._selectable; } catch { }
-            PluginLog.Info($"[AmanatsuVR][H] forte: botao={(botao != null ? botao.name : "-")} estado={estado}");
+            PluginLog.Info($"[AmanatsuVR][H] strong: button={(botao != null ? botao.name : "-")} state={estado}");
             Clica(botao != null ? botao.gameObject : null);
         }
 
@@ -1007,7 +1007,7 @@ namespace AmanatsuVR.VRUtils
                     lista.Add((b.transform.position.x, b.gameObject, i));
                 }
             }
-            catch (Exception ex) { PluginLog.Warning($"[AmanatsuVR][H] botoes de finalizacao: {ex.Message}"); }
+            catch (Exception ex) { PluginLog.Warning($"[AmanatsuVR][H] finish buttons: {ex.Message}"); }
             lista.Sort((a, b) => a.Item1.CompareTo(b.Item1));
             return lista;
         }
@@ -1019,7 +1019,7 @@ namespace AmanatsuVR.VRUtils
         private bool Finaliza(HScene hs, int posicao)
         {
             var lista = BotoesDeFinalizacao(hs);
-            PluginLog.Info($"[AmanatsuVR][H] finalizar posicao={posicao}: disponiveis=[{string.Join(",", lista.ConvertAll(b => $"{b.indice}:{b.go.name}"))}]");
+            PluginLog.Info($"[AmanatsuVR][H] finish position={posicao}: available=[{string.Join(",", lista.ConvertAll(b => $"{b.indice}:{b.go.name}"))}]");
             if (posicao < 0 || posicao >= lista.Count) return false;
             Clica(lista[posicao].go);
             return true;
@@ -1029,7 +1029,7 @@ namespace AmanatsuVR.VRUtils
         {
             if (go == null || EventSystem.current == null)
             {
-                PluginLog.Warning($"[AmanatsuVR][H] clique sem alvo (go={(go != null)} eventSystem={(EventSystem.current != null)})");
+                PluginLog.Warning($"[AmanatsuVR][H] click without target (go={(go != null)} eventSystem={(EventSystem.current != null)})");
                 return;
             }
             try
@@ -1037,7 +1037,7 @@ namespace AmanatsuVR.VRUtils
                 var dados = new PointerEventData(EventSystem.current) { button = PointerEventData.InputButton.Left };
                 ExecuteEvents.Execute(go, dados, ExecuteEvents.pointerClickHandler);
             }
-            catch (Exception ex) { PluginLog.Warning($"[AmanatsuVR][H] clique em '{go.name}' falhou: {ex.Message}"); }
+            catch (Exception ex) { PluginLog.Warning($"[AmanatsuVR][H] click on '{go.name}' failed: {ex.Message}"); }
         }
 
         // ---------------------------------------------------------------- tiro livre
@@ -1068,7 +1068,7 @@ namespace AmanatsuVR.VRUtils
             _putDesde = Time.unscaledTime;
             _logsPut = 0;
             LogCena("entrada");
-            PluginLog.Info($"[AmanatsuVR][H] tiro livre: {(_tiroAuto ? $"automatico no alvo '{(_alvoAuto != null ? _alvoAuto.name : "-")}'" : "mira pela mao")} tecla={_teclaTiro}");
+            PluginLog.Info($"[AmanatsuVR][H] free shot: {(_tiroAuto ? $"auto on target '{(_alvoAuto != null ? _alvoAuto.name : "-")}'" : "aim by hand")} key={_teclaTiro}");
         }
 
         private void SaiuPut()
@@ -1096,7 +1096,7 @@ namespace AmanatsuVR.VRUtils
             {
                 _homemReexibido = false;
                 try { var h = Ator(false); if (h != null) h.Active = false; } catch { }
-                PluginLog.Info("[AmanatsuVR][H][PUT] homem devolvido ao 'escondido' do jogo ate ele o reexibir.");
+                PluginLog.Info("[AmanatsuVR][H][PUT] man handed back to the game's 'hidden' state until it shows him again.");
             }
             Fade(); // o homem volta do recuo e a camera ao modo anterior
             MudaModo(_modoAntesDoPut);
@@ -1107,7 +1107,7 @@ namespace AmanatsuVR.VRUtils
                 Controlador?.MostrarPainel(true);
                 Controlador?.UIScreen?.LinkToHead(Cam, PluginConfig.UIScreenDistance.Value);
             }
-            PluginLog.Info("[AmanatsuVR][H] tiro livre encerrado.");
+            PluginLog.Info("[AmanatsuVR][H] free shot ended.");
         }
 
         private float _putDesde;
@@ -1128,7 +1128,7 @@ namespace AmanatsuVR.VRUtils
                 if (a == null || a.Active) return;
                 a.Active = true;
                 _homemReexibido = true;
-                PluginLog.Info($"[AmanatsuVR][H][PUT] '{a.Human?.GameObject?.name}' escondido pelo jogo no tiro livre; visivel e congelado na ultima pose.");
+                PluginLog.Info($"[AmanatsuVR][H][PUT] '{a.Human?.GameObject?.name}' hidden by the game during the free shot; visible and frozen in the last pose.");
             }
             catch { }
         }
@@ -1155,7 +1155,7 @@ namespace AmanatsuVR.VRUtils
                     _tiroAutoFim = agora + 1.5f;
                     Button fim = null;
                     try { fim = hs.GaugeController._buttonEndPut; } catch { }
-                    PluginLog.Info($"[AmanatsuVR][H] tiro automatico: encerrando ({(fim != null ? fim.name : "sem botao")})");
+                    PluginLog.Info($"[AmanatsuVR][H] automatic shot: ending ({(fim != null ? fim.name : "no button")})");
                     Clica(fim != null ? fim.gameObject : null);
                 }
                 return;
@@ -1223,9 +1223,9 @@ namespace AmanatsuVR.VRUtils
                 _logouEmissor = true;
                 string caminho = em.name;
                 for (var p = em.parent; p != null; p = p.parent) caminho = p.name + "/" + caminho;
-                PluginLog.Info($"[AmanatsuVR][H] emissor '{caminho}' pos={em.position} frente={em.forward} alvo={alvo}"
+                PluginLog.Info($"[AmanatsuVR][H] emitter '{caminho}' pos={em.position} forward={em.forward} target={alvo}"
                     + $" genital={(raiz != null ? raiz.name : "-")}->{(ponta != null ? ponta.name : "-")}"
-                    + $"{(ponta != null ? $" ponta={ponta.position}" : "")}");
+                    + $"{(ponta != null ? $" tip={ponta.position}" : "")}");
             }
 
             // A pose nao e tocada (girar a genital para a mira ficou estranho): o jato so sai da
@@ -1285,16 +1285,16 @@ namespace AmanatsuVR.VRUtils
                     }
                     bool ativo = false;
                     try { ativo = a.Active; } catch { }
-                    sb.Append($" | {go.name}(homem={a.IsMan} Active={ativo} go={go.activeInHierarchy} render={ligados}/{total} foraDaMascara={foraDaMascara})");
+                    sb.Append($" | {go.name}(man={a.IsMan} Active={ativo} go={go.activeInHierarchy} render={ligados}/{total} outsideMask={foraDaMascara})");
                 }
                 var head = Cam?.VR?.head;
                 Transform camJogo = null;
                 try { camJogo = HScene.Instance.MainCamera?.transform; } catch { }
-                sb.Append($" | visao={(head != null ? head.position.ToString("F2") : "-")} modo={_modo}{(_atorMulher ? "(mulher)" : "(homem)")}"
-                    + $" camJogo={(camJogo != null ? camJogo.position.ToString("F2") : "-")}");
+                sb.Append($" | view={(head != null ? head.position.ToString("F2") : "-")} mode={_modo}{(_atorMulher ? "(woman)" : "(man)")}"
+                    + $" gameCam={(camJogo != null ? camJogo.position.ToString("F2") : "-")}");
                 PluginLog.Info(sb.ToString());
             }
-            catch (Exception ex) { PluginLog.Warning($"[AmanatsuVR][H][PUT] log falhou: {ex.Message}"); }
+            catch (Exception ex) { PluginLog.Warning($"[AmanatsuVR][H][PUT] log failed: {ex.Message}"); }
         }
 
         private void Atira(bool apertado)
@@ -1323,7 +1323,7 @@ namespace AmanatsuVR.VRUtils
                     {
                         _tempoAto = UnityEngine.Random.Range(PluginConfig.HAutoTimeMin.Value, PluginConfig.HAutoTimeMax.Value);
                         MudaFase(Fase.Ato);
-                        PluginLog.Info($"[AmanatsuVR][H][AUTO] ato iniciado, finaliza em {_tempoAto:F0}s");
+                        PluginLog.Info($"[AmanatsuVR][H][AUTO] act started, finishes in {_tempoAto:F0}s");
                     }
                     else if (agora - _ultimaTentativa > 2f)
                     {
@@ -1347,7 +1347,7 @@ namespace AmanatsuVR.VRUtils
                         if (lista.Count > 0)
                         {
                             int i = UnityEngine.Random.Range(0, lista.Count);
-                            PluginLog.Info($"[AmanatsuVR][H][AUTO] finalizando por '{lista[i].go.name}' (indice {lista[i].indice})");
+                            PluginLog.Info($"[AmanatsuVR][H][AUTO] finishing via '{lista[i].go.name}' (index {lista[i].indice})");
                             Clica(lista[i].go);
                             MudaFase(Fase.Finalizando);
                         }
@@ -1390,7 +1390,7 @@ namespace AmanatsuVR.VRUtils
                 if (tabela != null && tabela.TryGetValue(cat, out var sub) && sub != null)
                     foreach (var id in sub.Keys) if (id != atual) ids.Add(id);
 
-                if (ids.Count == 0) { PluginLog.Info($"[AmanatsuVR][H][AUTO] categoria {cat} sem outra pose; mantem {atual}"); return; }
+                if (ids.Count == 0) { PluginLog.Info($"[AmanatsuVR][H][AUTO] category {cat} has no other pose; keeping {atual}"); return; }
                 int novo = ids[UnityEngine.Random.Range(0, ids.Count)];
 
                 var subSel = hs.PostureMainSelecter.SubSelecter;
@@ -1399,7 +1399,7 @@ namespace AmanatsuVR.VRUtils
                     int idx = subSel.FindIndex(novo);
                     if (idx >= 0)
                     {
-                        PluginLog.Info($"[AmanatsuVR][H][AUTO] pose {atual} -> {novo} (lista, indice {idx})");
+                        PluginLog.Info($"[AmanatsuVR][H][AUTO] pose {atual} -> {novo} (list, index {idx})");
                         subSel.NowSelect = idx;
                         return;
                     }
@@ -1408,7 +1408,7 @@ namespace AmanatsuVR.VRUtils
                 PluginLog.Info($"[AmanatsuVR][H][AUTO] pose {atual} -> {novo} (ChangePosture)");
                 hs.ChangePosture(cat, novo, hs.IsWeakness, false);
             }
-            catch (Exception ex) { PluginLog.Warning($"[AmanatsuVR][H][AUTO] troca de pose falhou: {ex.Message}"); }
+            catch (Exception ex) { PluginLog.Warning($"[AmanatsuVR][H][AUTO] pose change failed: {ex.Message}"); }
         }
     }
 

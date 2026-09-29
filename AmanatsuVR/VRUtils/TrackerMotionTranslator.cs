@@ -25,7 +25,7 @@ namespace AmanatsuVR.VRUtils
         {
             MainVRCamera = vrCamera;
             OwnerVRController = owner;
-            PluginLog.Info("[AmanatsuVR] TrackerMotionTranslator inicializado com sucesso.");
+            PluginLog.Info("[AmanatsuVR] TrackerMotionTranslator initialized successfully.");
         }
 
         public void Update()

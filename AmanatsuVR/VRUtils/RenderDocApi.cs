@@ -64,12 +64,12 @@ namespace AmanatsuVR.VRUtils
         {
             if (Resolve() == IntPtr.Zero)
             {
-                PluginLog.Warning("[RDOC] renderdoc.dll nao esta no processo. Inicie por Iniciar_VR_RenderDoc.bat.");
+                PluginLog.Warning("[RDOC] renderdoc.dll is not in the process. Start with Iniciar_VR_RenderDoc.bat.");
                 return;
             }
 
             Fn<TriggerMultiFrameCaptureDelegate>(IdxTriggerMultiFrameCapture)(frames);
-            PluginLog.Info($"[RDOC] captura de {frames} quadros pedida (total ate agora: {Fn<GetNumCapturesDelegate>(IdxGetNumCaptures)()})");
+            PluginLog.Info($"[RDOC] capture of {frames} frames requested (total so far: {Fn<GetNumCapturesDelegate>(IdxGetNumCaptures)()})");
         }
     }
 }

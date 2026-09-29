@@ -47,7 +47,7 @@ namespace AmanatsuVR
 
         void Awake()
         {
-            PluginLog.Info("[AmanatsuVR] Inicializando VRController global...");
+            PluginLog.Info("[AmanatsuVR] Initializing global VRController...");
 
             // 1. Câmera principal de renderização 3D estéreo VR
             MainVRCamera = VRCamera.Create(gameObject, nameof(MainVRCamera), MAIN_VR_CAMERA_DEPTH);
@@ -97,7 +97,7 @@ namespace AmanatsuVR
             if (PluginConfig.ManualEyeRender.Value && MainVRCamera != null && MainVRCamera.Normal != null)
             {
                 XREyeRenderer.Create(gameObject, MainVRCamera.Normal);
-                PluginLog.Info("[AmanatsuVR][EYE] renderização manual por olho ativada.");
+                PluginLog.Info("[AmanatsuVR][EYE] manual per-eye rendering enabled.");
             }
 
             // A janela pode perder o foco durante o carregamento (logo, SteamVR abrindo o dashboard).
@@ -154,7 +154,7 @@ namespace AmanatsuVR
                 }
 
                 LastHijackedCamera = targetCam;
-                PluginLog.Info($"[AmanatsuVR] Vinculando VRCamera a nova câmera de cena: '{targetCam.name}'");
+                PluginLog.Info($"[AmanatsuVR] Binding VRCamera to new scene camera: '{targetCam.name}'");
                 MainVRCamera.Hijack(targetCam);
             }
             else if (targetCam == null && LastHijackedCamera == null)
@@ -211,7 +211,7 @@ namespace AmanatsuVR
 
                 if (!IsValidGameCamera(c)) continue;
 
-                PluginLog.Info($"[AmanatsuVR] Câmera mono extra apagada: '{c.name}' depth={c.depth} mask=0x{c.cullingMask:X8} clear={c.clearFlags}");
+                PluginLog.Info($"[AmanatsuVR] Extra mono camera cleared: '{c.name}' depth={c.depth} mask=0x{c.cullingMask:X8} clear={c.clearFlags}");
                 mask |= c.cullingMask;
                 CameraHijacker.Hijack(c, null, false, false);
             }
@@ -238,12 +238,12 @@ namespace AmanatsuVR
                 }
                 if (asset == null)
                 {
-                    PluginLog.Warning("[AmanatsuVR][GRD] UniversalRenderPipelineAsset não encontrado.");
+                    PluginLog.Warning("[AmanatsuVR][GRD] UniversalRenderPipelineAsset not found.");
                     return;
                 }
 
-                PluginLog.Info($"[AmanatsuVR][GRD] asset='{asset.name}' modo={asset.gpuResidentDrawerMode}"
-                    + $" occlusionEmCameras={asset.gpuResidentDrawerEnableOcclusionCullingInCameras}");
+                PluginLog.Info($"[AmanatsuVR][GRD] asset='{asset.name}' mode={asset.gpuResidentDrawerMode}"
+                    + $" occlusionInCameras={asset.gpuResidentDrawerEnableOcclusionCullingInCameras}");
 
                 asset.gpuResidentDrawerEnableOcclusionCullingInCameras = false;
 
@@ -254,17 +254,17 @@ namespace AmanatsuVR
                 if (asset.useSRPBatcher)
                 {
                     asset.useSRPBatcher = false;
-                    PluginLog.Info("[AmanatsuVR][GRD] SRP Batcher DESLIGADO (teste do olho direito).");
+                    PluginLog.Info("[AmanatsuVR][GRD] SRP Batcher DISABLED (right eye test).");
                 }
                 if (asset.gpuResidentDrawerMode != UnityEngine.Rendering.GPUResidentDrawerMode.Disabled)
                 {
                     asset.gpuResidentDrawerMode = UnityEngine.Rendering.GPUResidentDrawerMode.Disabled;
-                    PluginLog.Info("[AmanatsuVR][GRD] GPU Resident Drawer DESATIVADO para XR multipass.");
+                    PluginLog.Info("[AmanatsuVR][GRD] GPU Resident Drawer DISABLED for XR multipass.");
                 }
             }
             catch (System.Exception ex)
             {
-                PluginLog.Warning($"[AmanatsuVR][GRD] falha ao ajustar: {ex.Message}");
+                PluginLog.Warning($"[AmanatsuVR][GRD] failed to adjust: {ex.Message}");
             }
         }
 
@@ -286,7 +286,7 @@ namespace AmanatsuVR
                 catch (System.Exception ex)
                 {
                     ok = false;
-                    PluginLog.Warning($"[AmanatsuVR][OLHO] não consegui espelhar {mode}: {ex.Message}");
+                    PluginLog.Warning($"[AmanatsuVR][EYE] could not mirror {mode}: {ex.Message}");
                 }
                 if (!ok) yield break;
 
@@ -297,7 +297,7 @@ namespace AmanatsuVR
 
             Unity.XR.OpenVR.OpenVRSettings.SetMirrorViewMode(
                 (ushort)Unity.XR.OpenVR.OpenVRSettings.MirrorViewModes.Left);
-            PluginLog.Info($"[AmanatsuVR][OLHO] par esquerdo/direito salvo para '{tag}'.");
+            PluginLog.Info($"[AmanatsuVR][EYE] left/right pair saved for '{tag}'.");
         }
 
         /// <summary>
@@ -321,11 +321,11 @@ namespace AmanatsuVR
                 if (asset == null) return;
 
                 var renderer = asset.GetRenderer(0);
-                PluginLog.Info($"[AmanatsuVR][RENDER] renderer='{(renderer != null ? renderer.GetType().Name : "NULO")}'"
+                PluginLog.Info($"[AmanatsuVR][RENDER] renderer='{(renderer != null ? renderer.GetType().Name : "NULL")}'"
                     + $" | asset.supportsCameraDepthTexture={asset.supportsCameraDepthTexture}"
                     + $" supportsCameraOpaqueTexture={asset.supportsCameraOpaqueTexture}"
                     + $" msaa={asset.msaaSampleCount} hdr={asset.supportsHDR}"
-                    + $" escalaRender={asset.renderScale}");
+                    + $" renderScale={asset.renderScale}");
 
                 // Sem textura intermediária a URP desenha direto na textura do olho, e a
                 // segunda passada é a que erra o alvo. Forçar intermediária + blit dá a cada
@@ -343,7 +343,7 @@ namespace AmanatsuVR
                 if (renderer != null)
                 {
                     renderer.useRenderPassEnabled = false;
-                    PluginLog.Info("[AmanatsuVR][RENDER] useRenderPassEnabled=false (Native RenderPass desligado).");
+                    PluginLog.Info("[AmanatsuVR][RENDER] useRenderPassEnabled=false (Native RenderPass off).");
                 }
 
                 // Forward+ NÃO suporta XR multipass — é limitação documentada da URP. Ele monta
@@ -363,14 +363,14 @@ namespace AmanatsuVR
                         {
                             urd.renderingMode = UnityEngine.Rendering.Universal.RenderingMode.Forward;
                             urd.SetDirty();
-                            PluginLog.Info($"[AmanatsuVR][RENDER] rendererData[{i}] -> Forward (Forward+ não faz multipass).");
+                            PluginLog.Info($"[AmanatsuVR][RENDER] rendererData[{i}] -> Forward (Forward+ does not do multipass).");
                         }
                     }
                 }
             }
             catch (System.Exception ex)
             {
-                PluginLog.Warning($"[AmanatsuVR][RENDER] falha: {ex.Message}");
+                PluginLog.Warning($"[AmanatsuVR][RENDER] failed: {ex.Message}");
             }
         }
 
@@ -410,20 +410,20 @@ namespace AmanatsuVR
                         display.GetCullingParameters(cam, ci, out var cp);
 
                         PluginLog.Info($"[AmanatsuVR][XRCULL] culling {ci}: mask=0x{cp.cullingMask:X8}"
-                            + $" planos={cp.cullingPlaneCount} origem={cp.origin} ortho={cp.isOrthographic}"
-                            + $" sombra={cp.shadowDistance}");
-                        PluginLog.Info($"[AmanatsuVR][XRCULL] culling {ci}: matriz={DescribeProjection(cp.cullingMatrix)}");
+                            + $" planes={cp.cullingPlaneCount} origin={cp.origin} ortho={cp.isOrthographic}"
+                            + $" shadow={cp.shadowDistance}");
+                        PluginLog.Info($"[AmanatsuVR][XRCULL] culling {ci}: matrix={DescribeProjection(cp.cullingMatrix)}");
                         for (int p = 0; p < cp.cullingPlaneCount && p < 6; p++)
                         {
                             var pl = cp.GetCullingPlane(p);
-                            PluginLog.Info($"[AmanatsuVR][XRCULL]   plano {p}: n={pl.normal} d={pl.distance:F3}");
+                            PluginLog.Info($"[AmanatsuVR][XRCULL]   plane {p}: n={pl.normal} d={pl.distance:F3}");
                         }
                     }
                 }
             }
             catch (System.Exception ex)
             {
-                PluginLog.Warning($"[AmanatsuVR][XRCULL] falhou: {ex.GetType().Name}: {ex.Message}");
+                PluginLog.Warning($"[AmanatsuVR][XRCULL] failed: {ex.GetType().Name}: {ex.Message}");
             }
         }
 
@@ -436,7 +436,7 @@ namespace AmanatsuVR
                 SubsystemManager.GetSubsystems(list);
                 if (list.Count == 0)
                 {
-                    PluginLog.Warning("[AmanatsuVR][XR] nenhum XRDisplaySubsystem encontrado.");
+                    PluginLog.Warning("[AmanatsuVR][XR] no XRDisplaySubsystem found.");
                     return;
                 }
 
@@ -454,7 +454,7 @@ namespace AmanatsuVR
                     }
                     catch (System.Exception ex)
                     {
-                        PluginLog.Warning($"[AmanatsuVR][XR] singlePassAllowed falhou: {ex.Message}");
+                        PluginLog.Warning($"[AmanatsuVR][XR] singlePassAllowed failed: {ex.Message}");
                     }
                 }
 
@@ -466,18 +466,18 @@ namespace AmanatsuVR
                 {
                     if (display == null) continue;
                     PluginLog.Info($"[AmanatsuVR][XR] display running={display.running}"
-                        + $" layout={display.textureLayout} suportados={display.supportedTextureLayouts}");
+                        + $" layout={display.textureLayout} supported={display.supportedTextureLayouts}");
 
                     if (display.textureLayout != wanted)
                     {
                         display.textureLayout = wanted;
-                        PluginLog.Info($"[AmanatsuVR][XR] textureLayout alterado para {display.textureLayout}");
+                        PluginLog.Info($"[AmanatsuVR][XR] textureLayout changed to {display.textureLayout}");
                     }
                 }
             }
             catch (System.Exception ex)
             {
-                PluginLog.Warning($"[AmanatsuVR][XR] falha ao ajustar textureLayout: {ex.Message}");
+                PluginLog.Warning($"[AmanatsuVR][XR] failed to adjust textureLayout: {ex.Message}");
             }
         }
 
@@ -490,7 +490,7 @@ namespace AmanatsuVR
         private void DumpUnusualGraphics()
         {
             int shown = 0;
-            PluginLog.Info("[AmanatsuVR][GFX] Graphics com shader fora do comum:");
+            PluginLog.Info("[AmanatsuVR][GFX] Graphics with unusual shader:");
             foreach (var g in FindObjectsOfType<UnityEngine.UI.Graphic>(true))
             {
                 if (g == null || !g.enabled || !g.gameObject.activeInHierarchy) continue;
@@ -500,11 +500,11 @@ namespace AmanatsuVR
                 string shader = (mat != null && mat.shader != null) ? mat.shader.name : "SEM MATERIAL";
                 if (shader == "UI/Default" || shader.StartsWith("TextMeshPro")) continue;
 
-                if (++shown > 40) { PluginLog.Info("[AmanatsuVR][GFX]   ... (truncado em 40)"); break; }
+                if (++shown > 40) { PluginLog.Info("[AmanatsuVR][GFX]   ... (truncated at 40)"); break; }
 
                 var canvas = g.canvas;
-                PluginLog.Info($"[AmanatsuVR][GFX]   '{GetHierarchyPath(g.transform)}' tipo={g.GetIl2CppType().Name}"
-                    + $" layer={g.gameObject.layer} cor={g.color} material='{(mat != null ? mat.name : "-")}' shader='{shader}'"
+                PluginLog.Info($"[AmanatsuVR][GFX]   '{GetHierarchyPath(g.transform)}' type={g.GetIl2CppType().Name}"
+                    + $" layer={g.gameObject.layer} color={g.color} material='{(mat != null ? mat.name : "-")}' shader='{shader}'"
                     + $" canvas={(canvas != null ? canvas.renderMode.ToString() : "-")} pos={g.transform.position}");
             }
         }
@@ -554,7 +554,7 @@ namespace AmanatsuVR
         private void CaptureEyeViewsToPng(string tag)
         {
             var cam = MainVRCamera != null ? MainVRCamera.Normal : null;
-            if (cam == null) { PluginLog.Warning("[AmanatsuVR][OLHO] sem câmera VR."); return; }
+            if (cam == null) { PluginLog.Warning("[AmanatsuVR][EYE] no VR camera."); return; }
 
             string dir = System.IO.Path.Combine(Application.dataPath, "..", "AmanatsuVR_diag");
             System.IO.Directory.CreateDirectory(dir);
@@ -608,7 +608,7 @@ namespace AmanatsuVR
                             if (AabbInFrustum(planes, r.bounds)) dentro++;
                         }
                     }
-                    catch (System.Exception ex) { PluginLog.Warning($"[AmanatsuVR][OLHO] contagem falhou: {ex.Message}"); }
+                    catch (System.Exception ex) { PluginLog.Warning($"[AmanatsuVR][EYE] count failed: {ex.Message}"); }
 
                     probe.worldToCameraMatrix = view;
                     probe.projectionMatrix = proj;
@@ -629,7 +629,7 @@ namespace AmanatsuVR
                     System.IO.File.WriteAllBytes(path, bytes);
                     Destroy(tex);
 
-                    PluginLog.Info($"[AmanatsuVR][OLHO] {nome}: {dentro}/{renderers.Length} renderizadores no frustum, PNG='{path}'");
+                    PluginLog.Info($"[AmanatsuVR][EYE] {nome}: {dentro}/{renderers.Length} renderers in frustum, PNG='{path}'");
                 }
 
                 // Teoria do Marcus: a cabeça pode estar DENTRO de um objeto grande que oclui o
@@ -643,18 +643,18 @@ namespace AmanatsuVR
                     if (!r.bounds.Contains(cabeca)) continue;
                     dentroDeAlgo++;
                     var b = r.bounds;
-                    PluginLog.Info($"[AmanatsuVR][DENTRO] '{GetHierarchyPath(r.transform)}' layer={r.gameObject.layer}"
-                        + $" tipo={r.GetType().Name} tam={b.size} centro={b.center}"
+                    PluginLog.Info($"[AmanatsuVR][INSIDE] '{GetHierarchyPath(r.transform)}' layer={r.gameObject.layer}"
+                        + $" type={r.GetType().Name} size={b.size} center={b.center}"
                         + $" shader='{(r.sharedMaterial != null && r.sharedMaterial.shader != null ? r.sharedMaterial.shader.name : "-")}'");
                 }
-                PluginLog.Info($"[AmanatsuVR][DENTRO] cabeça em {cabeca}: dentro dos bounds de {dentroDeAlgo} renderizadores.");
+                PluginLog.Info($"[AmanatsuVR][INSIDE] head at {cabeca}: inside the bounds of {dentroDeAlgo} renderers.");
 
                 probe.targetTexture = null;
                 rt.Release();
             }
             catch (System.Exception ex)
             {
-                PluginLog.Error($"[AmanatsuVR][OLHO] falha: {ex}");
+                PluginLog.Error($"[AmanatsuVR][EYE] failed: {ex}");
             }
             finally
             {
@@ -673,7 +673,7 @@ namespace AmanatsuVR
             {
                 var rt = UIScreen != null && UIScreen.Panels != null && UIScreen.Panels.Length > 0
                     ? UIScreen.Panels[0].Texture : null;
-                if (rt == null) { PluginLog.Warning("[AmanatsuVR][PNG] sem RenderTexture de UI."); return; }
+                if (rt == null) { PluginLog.Warning("[AmanatsuVR][PNG] no UI RenderTexture."); return; }
 
                 var prev = RenderTexture.active;
                 RenderTexture.active = rt;
@@ -692,14 +692,14 @@ namespace AmanatsuVR
                 string path = System.IO.Path.Combine(dir, $"UI_{tag}.png");
                 System.IO.File.WriteAllBytes(path, bytes);
                 Destroy(tex);
-                PluginLog.Info($"[AmanatsuVR][PNG] captura de uGUI salva em '{path}'");
+                PluginLog.Info($"[AmanatsuVR][PNG] uGUI capture saved to '{path}'");
 
                 // A janela do desktop espelha um dos olhos: é a visão real, com o objeto rosa.
                 ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(dir, $"OLHO_{tag}.png"));
             }
             catch (System.Exception ex)
             {
-                PluginLog.Error($"[AmanatsuVR][PNG] falha: {ex}");
+                PluginLog.Error($"[AmanatsuVR][PNG] failed: {ex}");
             }
         }
 
@@ -718,17 +718,17 @@ namespace AmanatsuVR
                 if (canvas.transform.root == transform.root) continue;
 
                 PluginLog.Info($"[AmanatsuVR][CANVAS]   '{GetHierarchyPath(canvas.transform)}' layer={canvas.gameObject.layer}"
-                    + $" ativo={canvas.gameObject.activeInHierarchy} pos={canvas.transform.position}"
-                    + $" escala={canvas.transform.lossyScale} cam={(canvas.worldCamera != null ? canvas.worldCamera.name : "-")}");
+                    + $" active={canvas.gameObject.activeInHierarchy} pos={canvas.transform.position}"
+                    + $" scale={canvas.transform.lossyScale} cam={(canvas.worldCamera != null ? canvas.worldCamera.name : "-")}");
 
                 foreach (var g in canvas.gameObject.GetComponentsInChildren<UnityEngine.UI.Graphic>(true))
                 {
                     if (g == null || !g.enabled) continue;
-                    if (++shown > 30) { PluginLog.Info("[AmanatsuVR][CANVAS]   ... (truncado em 30)"); return; }
+                    if (++shown > 30) { PluginLog.Info("[AmanatsuVR][CANVAS]   ... (truncated at 30)"); return; }
 
                     var mat = g.materialForRendering;
-                    PluginLog.Info($"[AmanatsuVR][CANVAS]     '{g.name}' tipo={g.GetIl2CppType().Name} layer={g.gameObject.layer}"
-                        + $" cor={g.color} material='{(mat != null ? mat.name : "NULO")}'"
+                    PluginLog.Info($"[AmanatsuVR][CANVAS]     '{g.name}' type={g.GetIl2CppType().Name} layer={g.gameObject.layer}"
+                        + $" color={g.color} material='{(mat != null ? mat.name : "NULL")}'"
                         + $" shader='{(mat != null && mat.shader != null ? mat.shader.name : "-")}'");
                 }
             }
@@ -743,9 +743,9 @@ namespace AmanatsuVR
         private void DumpSceneDiagnostics()
         {
             var desc = UnityEngine.XR.XRSettings.eyeTextureDesc;
-            PluginLog.Info($"[AmanatsuVR][XR] modo={UnityEngine.XR.XRSettings.stereoRenderingMode}"
+            PluginLog.Info($"[AmanatsuVR][XR] mode={UnityEngine.XR.XRSettings.stereoRenderingMode}"
                 + $" eyeTexture={desc.width}x{desc.height} volumeDepth={desc.volumeDepth}"
-                + " (volumeDepth=2 => single pass instanced de verdade)");
+                + " (volumeDepth=2 => single pass instanced for real)");
 
             // Se o cenário for entidades (BRG), quase não existem MeshRenderer de GameObject
             // na cena. Se existirem às centenas, a culpa do olho direito NÃO é do Entities
@@ -758,8 +758,8 @@ namespace AmanatsuVR
                 if (r.TryCast<MeshRenderer>() != null) meshRenderers++;
                 else if (r.TryCast<SkinnedMeshRenderer>() != null) skinned++;
             }
-            PluginLog.Info($"[AmanatsuVR][GO] renderizadores de GameObject ativos: total={renderers}"
-                + $" mesh={meshRenderers} skinned={skinned} (poucos => cenário é Entities/BRG)");
+            PluginLog.Info($"[AmanatsuVR][GO] active GameObject renderers: total={renderers}"
+                + $" mesh={meshRenderers} skinned={skinned} (few => scenery is Entities/BRG)");
 
             // O laser (LineRenderer) sobrevive nos dois olhos e todo MeshRenderer some num deles.
             // Se a teoria for culling, a diferença tem que estar em bounds/isVisible.
@@ -767,7 +767,7 @@ namespace AmanatsuVR
             if (cam != null)
             {
                 bool matrizExplicita = cam.cullingMatrix != (cam.projectionMatrix * cam.worldToCameraMatrix);
-                PluginLog.Info($"[AmanatsuVR][CULL] cullingMatrix difere de proj*view? {matrizExplicita}"
+                PluginLog.Info($"[AmanatsuVR][CULL] cullingMatrix differs from proj*view? {matrizExplicita}"
                     + $" | occlusionCulling={cam.useOcclusionCulling} layerCullSpherical={cam.layerCullSpherical}");
 
                 // O laranja a 2 m aparece nos dois olhos e o roxo a 6 m só num: isso é corte por
@@ -775,27 +775,27 @@ namespace AmanatsuVR
                 // está com o far plane curto.
                 PluginLog.Info($"[AmanatsuVR][PROJ] camera near={cam.nearClipPlane:F3} far={cam.farClipPlane:F1}"
                     + $" | mono {DescribeProjection(cam.projectionMatrix)}"
-                    + $" | esquerdo {DescribeProjection(cam.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left))}"
-                    + $" | direito {DescribeProjection(cam.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right))}");
+                    + $" | left {DescribeProjection(cam.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left))}"
+                    + $" | right {DescribeProjection(cam.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right))}");
             }
             foreach (var r in GetComponentsInChildren<Renderer>(true))
             {
                 if (r == null) continue;
-                PluginLog.Info($"[AmanatsuVR][CULL]   '{r.gameObject.name}' tipo={r.GetIl2CppType().Name}"
-                    + $" ativo={r.enabled} visivel={r.isVisible} bounds={r.bounds.center}/{r.bounds.size}");
+                PluginLog.Info($"[AmanatsuVR][CULL]   '{r.gameObject.name}' type={r.GetIl2CppType().Name}"
+                    + $" active={r.enabled} visible={r.isVisible} bounds={r.bounds.center}/{r.bounds.size}");
             }
 
             var cams = Camera.allCameras;
-            PluginLog.Info($"[AmanatsuVR][CAMS] {(cams == null ? 0 : cams.Length)} câmeras ativas:");
+            PluginLog.Info($"[AmanatsuVR][CAMS] {(cams == null ? 0 : cams.Length)} active cameras:");
             if (cams != null)
             {
                 foreach (var c in cams)
                 {
                     if (c == null) continue;
                     PluginLog.Info($"[AmanatsuVR][CAMS]   '{GetHierarchyPath(c.transform)}' tag={c.tag} depth={c.depth}"
-                        + $" olho={c.stereoTargetEye} mask=0x{c.cullingMask:X8} clear={c.clearFlags}"
+                        + $" eye={c.stereoTargetEye} mask=0x{c.cullingMask:X8} clear={c.clearFlags}"
                         + $" rt={(c.targetTexture != null ? c.targetTexture.name : "-")}"
-                        + $" hijacker={(c.GetComponent<CameraHijacker>() != null)} valida={IsValidGameCamera(c)}");
+                        + $" hijacker={(c.GetComponent<CameraHijacker>() != null)} valid={IsValidGameCamera(c)}");
 
                     // Se as duas posições de olho não estiverem a ~6,5 cm uma da outra e em volta
                     // da posição da câmera, a matriz de view por olho está quebrada.
@@ -803,9 +803,9 @@ namespace AmanatsuVR
                     {
                         Vector3 le = c.GetStereoViewMatrix(Camera.StereoscopicEye.Left).inverse.GetColumn(3);
                         Vector3 re = c.GetStereoViewMatrix(Camera.StereoscopicEye.Right).inverse.GetColumn(3);
-                        PluginLog.Info($"[AmanatsuVR][CAMS]     transform={c.transform.position} olhoE={le} olhoD={re}"
-                            + $" separacao={Vector3.Distance(le, re):F4}m fov={c.fieldOfView:F1} near={c.nearClipPlane:F3}"
-                            + $" escala={c.transform.lossyScale} escalaLocal={c.transform.localScale}");
+                        PluginLog.Info($"[AmanatsuVR][CAMS]     transform={c.transform.position} eyeL={le} eyeR={re}"
+                            + $" separation={Vector3.Distance(le, re):F4}m fov={c.fieldOfView:F1} near={c.nearClipPlane:F3}"
+                            + $" scale={c.transform.lossyScale} localScale={c.transform.localScale}");
                     }
                 }
             }
@@ -817,17 +817,17 @@ namespace AmanatsuVR
             // INCLUI a nossa própria hierarquia: na Title a VRCamera só enxerga a layer 31,
             // então o objeto rosa só pode ser nosso (painel, laser ou retículo).
             int shown = 0;
-            PluginLog.Info($"[AmanatsuVR][PERTO] renderizadores a menos de 5m da cabeça {head}:");
+            PluginLog.Info($"[AmanatsuVR][NEAR] renderers within 5 m of the head {head}:");
             foreach (var r in FindObjectsOfType<Renderer>())
             {
                 if (r == null || !r.enabled) continue;
                 if (Vector3.Distance(r.bounds.center, head) > 5.0f) continue;
-                if (++shown > 40) { PluginLog.Info("[AmanatsuVR][PERTO]   ... (truncado em 40)"); break; }
+                if (++shown > 40) { PluginLog.Info("[AmanatsuVR][NEAR]   ... (truncated at 40)"); break; }
 
                 var mat = r.sharedMaterial;
-                PluginLog.Info($"[AmanatsuVR][PERTO]   '{GetHierarchyPath(r.transform)}' layer={r.gameObject.layer}"
-                    + $" tipo={r.GetIl2CppType().Name} tam={r.bounds.size} dist={Vector3.Distance(r.bounds.center, head):F2}"
-                    + $" material='{(mat != null ? mat.name : "NULO")}' shader='{(mat != null && mat.shader != null ? mat.shader.name : "-")}'");
+                PluginLog.Info($"[AmanatsuVR][NEAR]   '{GetHierarchyPath(r.transform)}' layer={r.gameObject.layer}"
+                    + $" type={r.GetIl2CppType().Name} size={r.bounds.size} dist={Vector3.Distance(r.bounds.center, head):F2}"
+                    + $" material='{(mat != null ? mat.name : "NULL")}' shader='{(mat != null && mat.shader != null ? mat.shader.name : "-")}'");
             }
         }
 
@@ -845,12 +845,12 @@ namespace AmanatsuVR
                 var mat = r.sharedMaterial;
                 if (mat == null)
                 {
-                    PluginLog.Warning($"[AmanatsuVR] Renderer sem material (renderiza rosa): '{GetHierarchyPath(r.transform)}'");
+                    PluginLog.Warning($"[AmanatsuVR] Renderer without material (renders pink): '{GetHierarchyPath(r.transform)}'");
                     continue;
                 }
                 if (mat.shader == null || !mat.shader.name.Contains("InternalError")) continue;
 
-                PluginLog.Warning($"[AmanatsuVR] Renderer com shader de erro DESATIVADO: '{GetHierarchyPath(r.transform)}' (material='{mat.name}')");
+                PluginLog.Warning($"[AmanatsuVR] Renderer with error shader DISABLED: '{GetHierarchyPath(r.transform)}' (material='{mat.name}')");
                 r.enabled = false;
             }
         }
@@ -960,8 +960,8 @@ namespace AmanatsuVR
                 if (lista == _ultimaListaCam) return;
                 _ultimaListaCam = lista;
 
-                PluginLog.Info($"[AmanatsuVR][CAM] alvo='{(LastHijackedCamera != null ? LastHijackedCamera.name : "-")}'"
-                    + $" negra='{(VRControllerLaser.CameraDaMassagemMorta != null ? VRControllerLaser.CameraDaMassagemMorta.name : "-")}'"
+                PluginLog.Info($"[AmanatsuVR][CAM] target='{(LastHijackedCamera != null ? LastHijackedCamera.name : "-")}'"
+                    + $" blocked='{(VRControllerLaser.CameraDaMassagemMorta != null ? VRControllerLaser.CameraDaMassagemMorta.name : "-")}'"
                     + $" |{lista}");
             }
             catch { }
@@ -1041,7 +1041,7 @@ namespace AmanatsuVR
                 bool morto = MainVRCamera != null && MainVRCamera.HijackMorto;
                 if (currentCam != null && (currentCam != LastHijackedCamera || morto))
                 {
-                    if (morto) PluginLog.Info($"[AmanatsuVR] Vinculo de camera morto; revinculando a '{currentCam.name}'.");
+                    if (morto) PluginLog.Info($"[AmanatsuVR] Camera binding dead; rebinding to '{currentCam.name}'.");
                     UpdateCamera(false);
                 }
                 else if (!morto)
@@ -1085,7 +1085,7 @@ namespace AmanatsuVR
             PainelVisivel = visivel;
             var painel = UIScreen != null ? UIScreen.MainPanelObject : null;
             if (painel != null) painel.SetActive(visivel);
-            PluginLog.Info($"[AmanatsuVR][PAINEL] visivel={visivel}");
+            PluginLog.Info($"[AmanatsuVR][PANEL] visible={visivel}");
         }
 
         /// <summary>
@@ -1127,8 +1127,8 @@ namespace AmanatsuVR
             UIScreen.LinkToHead(MainVRCamera, PluginConfig.UIScreenDistance.Value);
             var sc = UIScreen.MainPanelObject;
             if (sc != null)
-                PluginLog.Info($"[AmanatsuVR][PAINEL] reposicionado apos troca de cena '{scene}': dist da cabeca {Vector3.Distance(sc.transform.position, MainVRCamera.VR.head.position):F2}"
-                    + $" (cabeca local {MainVRCamera.VR.head.localPosition}, escala rig {MainVRCamera.VR.origin.localScale.x:F2})");
+                PluginLog.Info($"[AmanatsuVR][PANEL] repositioned after scene change '{scene}': distance from head {Vector3.Distance(sc.transform.position, MainVRCamera.VR.head.position):F2}"
+                    + $" (local head {MainVRCamera.VR.head.localPosition}, rig scale {MainVRCamera.VR.origin.localScale.x:F2})");
         }
 
         /// <summary>

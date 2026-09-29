@@ -49,7 +49,7 @@ namespace AmanatsuVR.VRUtils
             MainVRCamera = vrCamera;
             Laser = laser;
             Controlador = controlador;
-            PluginLog.Info("[AmanatsuVR] VRWaterGunHandler inicializado com sucesso.");
+            PluginLog.Info("[AmanatsuVR] VRWaterGunHandler initialized successfully.");
         }
 
         /// <summary>
@@ -162,8 +162,8 @@ namespace AmanatsuVR.VRUtils
                         OriginalGunParent = gunTrans.parent;
                         _desvioLocal = MedeDesvioDoModelo(gunTrans);
 
-                        PluginLog.Info($"[AmanatsuVR] Pistola d'água '{gunTrans.name}' acoplada com sucesso ao controle VR!"
-                            + $" desvioLocal={_desvioLocal} pai='{(OriginalGunParent != null ? OriginalGunParent.name : "-")}'");
+                        PluginLog.Info($"[AmanatsuVR] Water gun '{gunTrans.name}' attached to the VR controller successfully!"
+                            + $" localOffset={_desvioLocal} parent='{(OriginalGunParent != null ? OriginalGunParent.name : "-")}'");
                     }
 
                     // Qual botao o jogo le para atirar. Se for ShootKey (um KeyCode), os nossos
@@ -173,17 +173,17 @@ namespace AmanatsuVR.VRUtils
                     {
                         TeclaDeTiro = p.ShootKey;
                         BotaoDeTiro = p.ShootMouseKey;
-                        PluginLog.Info($"[AmanatsuVR][AGUA] ShootKey={p.ShootKey} ShootMouseKey={p.ShootMouseKey}");
+                        PluginLog.Info($"[AmanatsuVR][WATER] ShootKey={p.ShootKey} ShootMouseKey={p.ShootMouseKey}");
                     }
                     else
                     {
-                        PluginLog.Warning("[AmanatsuVR] Transform da pistola d'água não encontrado na cena.");
+                        PluginLog.Warning("[AmanatsuVR] Water gun transform not found in the scene.");
                     }
                 }
             }
             catch (Exception ex)
             {
-                PluginLog.Error($"[AmanatsuVR] Erro ao vincular pistola d'água: {ex.Message}");
+                PluginLog.Error($"[AmanatsuVR] Error binding water gun: {ex.Message}");
             }
         }
 

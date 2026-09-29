@@ -50,7 +50,7 @@ namespace AmanatsuVR.VRUtils
 
             if (OpenVR.Input == null)
             {
-                PluginLog.Warning("[AmanatsuVR] IVRInput indisponível; gatilho VR ficará sem resposta.");
+                PluginLog.Warning("[AmanatsuVR] IVRInput unavailable; the VR trigger will not respond.");
                 return;
             }
 
@@ -59,7 +59,7 @@ namespace AmanatsuVR.VRUtils
             string manifest = Path.Combine(Application.streamingAssetsPath, "SteamVR", "actions.json");
             if (!File.Exists(manifest))
             {
-                PluginLog.Error($"[AmanatsuVR] actions.json não encontrado em '{manifest}'.");
+                PluginLog.Error($"[AmanatsuVR] actions.json not found at '{manifest}'.");
                 return;
             }
 
@@ -85,7 +85,7 @@ namespace AmanatsuVR.VRUtils
                 : new VRActiveActionSet_t[] { new VRActiveActionSet_t { ulActionSet = _actionSet } };
 
             Available = _actionSet != 0 && (_interactUI != 0 || _grabPinch != 0);
-            PluginLog.Info($"[AmanatsuVR] SteamVR Input v2 {(Available ? "PRONTO" : "INDISPONÍVEL")}.");
+            PluginLog.Info($"[AmanatsuVR] SteamVR Input v2 {(Available ? "READY" : "UNAVAILABLE")}.");
         }
 
         private static void LogHandle(EVRInputError err, string name, ulong handle)

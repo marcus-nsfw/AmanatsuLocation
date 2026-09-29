@@ -109,7 +109,7 @@ namespace AmanatsuVR.VRUtils
                 }
                 catch (System.Exception ex)
                 {
-                    PluginLog.Error($"[AmanatsuVR][EYE] falha: {ex}");
+                    PluginLog.Error($"[AmanatsuVR][EYE] failed: {ex}");
                     yield break;
                 }
             }
@@ -149,9 +149,9 @@ namespace AmanatsuVR.VRUtils
                     if (!Described)
                     {
                         Described = true;
-                        PluginLog.Info($"[AmanatsuVR][EYE] passadas={passes} parametros={paramCount}"
-                            + $" alvo={desc.width}x{desc.height} volumeDepth={desc.volumeDepth}"
-                            + $" fatia={prm.textureArraySlice} viewport={prm.viewport}");
+                        PluginLog.Info($"[AmanatsuVR][EYE] passes={passes} params={paramCount}"
+                            + $" target={desc.width}x{desc.height} volumeDepth={desc.volumeDepth}"
+                            + $" slice={prm.textureArraySlice} viewport={prm.viewport}");
                     }
 
                     Probe.worldToCameraMatrix = prm.view;

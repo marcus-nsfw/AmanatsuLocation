@@ -23,12 +23,12 @@ namespace AmanatsuVR.VRUtils
             if (_dumped || Time.unscaledTime - _pausedSince < Threshold) return;
             _dumped = true;
             try { Dump(); }
-            catch (System.Exception ex) { PluginLog.Warning($"[AmanatsuVR][PAUSA] dump falhou: {ex.Message}"); }
+            catch (System.Exception ex) { PluginLog.Warning($"[AmanatsuVR][PAUSE] dump failed: {ex.Message}"); }
         }
 
         private static void Dump()
         {
-            PluginLog.Info($"[AmanatsuVR][PAUSA] timeScale=0 ha {Threshold:F0}s; cena='{UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}'");
+            PluginLog.Info($"[AmanatsuVR][PAUSE] timeScale=0 for {Threshold:F0}s; scene='{UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}'");
             foreach (var c in Object.FindObjectsOfType<Canvas>())
             {
                 if (c == null || !c.isActiveAndEnabled || !c.isRootCanvas) continue;
@@ -40,13 +40,13 @@ namespace AmanatsuVR.VRUtils
                     if (visible++ < 4) sample += $" '{g.name}'";
                 }
                 var cg = c.GetComponent<CanvasGroup>();
-                PluginLog.Info($"[AmanatsuVR][PAUSA]   canvas '{c.name}' modo={c.renderMode} cam={(c.worldCamera != null ? c.worldCamera.name : "-")}"
-                    + $" ordem={c.sortingOrder} grupoAlfa={(cg != null ? cg.alpha : 1f):F2} graficos={visible}{sample}");
+                PluginLog.Info($"[AmanatsuVR][PAUSE]   canvas '{c.name}' mode={c.renderMode} cam={(c.worldCamera != null ? c.worldCamera.name : "-")}"
+                    + $" order={c.sortingOrder} alphaGroup={(cg != null ? cg.alpha : 1f):F2} graphics={visible}{sample}");
             }
             foreach (var s in Object.FindObjectsOfType<ILLGAMES.ADV.TextScenario>(true))
-                if (s != null) PluginLog.Info($"[AmanatsuVR][PAUSA]   ADV '{s.gameObject.name}' ativo={s.gameObject.activeInHierarchy} habilitado={s.enabled}");
+                if (s != null) PluginLog.Info($"[AmanatsuVR][PAUSE]   ADV '{s.gameObject.name}' active={s.gameObject.activeInHierarchy} enabled={s.enabled}");
             foreach (var cam in Object.FindObjectsOfType<Camera>())
-                if (cam != null) PluginLog.Info($"[AmanatsuVR][PAUSA]   camera '{cam.name}' ligada={cam.enabled} far={cam.farClipPlane:F1} alvo={(cam.targetTexture != null ? cam.targetTexture.name : "-")}");
+                if (cam != null) PluginLog.Info($"[AmanatsuVR][PAUSE]   camera '{cam.name}' enabled={cam.enabled} far={cam.farClipPlane:F1} target={(cam.targetTexture != null ? cam.targetTexture.name : "-")}");
         }
     }
 
@@ -74,12 +74,12 @@ namespace AmanatsuVR.VRUtils
             {
                 if (_open.ContainsKey(ui.Pointer))
                 {
-                    PluginLog.Warning($"[AmanatsuVR][TIME] {name} aberta de novo sem fechar: ignorado (guardaria timeScale 0).");
+                    PluginLog.Warning($"[AmanatsuVR][TIME] {name} reopened without closing: ignored (would store timeScale 0).");
                     return false;
                 }
                 if (Time.timeScale == 0f && _open.Count == 0)
                 {
-                    PluginLog.Warning($"[AmanatsuVR][TIME] {name} abrindo com timeScale ja 0 e nenhuma tela aberta: volta para 1 antes.");
+                    PluginLog.Warning($"[AmanatsuVR][TIME] {name} opening with timeScale already 0 and no screen open: resetting to 1 first.");
                     Time.timeScale = 1f;
                 }
                 _open[ui.Pointer] = ui;
@@ -92,7 +92,7 @@ namespace AmanatsuVR.VRUtils
         public static void AfterOpenClose(Component ui, bool open)
         {
             if (open || _open.Count > 0 || Time.timeScale != 0f) return;
-            PluginLog.Warning($"[AmanatsuVR][TIME] {(ui != null ? ui.GetType().Name : "?")} fechou e o timeScale ficou 0: volta para 1.");
+            PluginLog.Warning($"[AmanatsuVR][TIME] {(ui != null ? ui.GetType().Name : "?")} closed and timeScale stayed 0: resetting to 1.");
             Time.timeScale = 1f;
         }
 
@@ -129,12 +129,12 @@ namespace AmanatsuVR.VRUtils
                 try
                 {
                     var m = HarmonyLib.AccessTools.Method(type, method);
-                    if (m == null) { PluginLog.Warning($"[AmanatsuVR][TIME] {type.Name}.{method} nao existe"); continue; }
+                    if (m == null) { PluginLog.Warning($"[AmanatsuVR][TIME] {type.Name}.{method} does not exist"); continue; }
                     h.Patch(m, pre, post); ok++;
                 }
-                catch (System.Exception ex) { PluginLog.Warning($"[AmanatsuVR][TIME] patch {type.Name}.{method} falhou: {ex.Message}"); }
+                catch (System.Exception ex) { PluginLog.Warning($"[AmanatsuVR][TIME] patch {type.Name}.{method} failed: {ex.Message}"); }
             }
-            PluginLog.Info($"[AmanatsuVR][TIME] {ok}/{_setters.Length} pontos que mexem no timeScale monitorados.");
+            PluginLog.Info($"[AmanatsuVR][TIME] {ok}/{_setters.Length} timeScale touch points monitored.");
         }
 
         public static void LogPrefix(out float __state) => __state = Time.timeScale;
@@ -147,7 +147,7 @@ namespace AmanatsuVR.VRUtils
                 if (__originalMethod.Name.EndsWith("OnAdded")) _open[c.Pointer] = c; else _open.Remove(c.Pointer);
             }
             if (Time.timeScale != __state)
-                PluginLog.Info($"[AmanatsuVR][TIME] {who}: timeScale {__state:F2} -> {Time.timeScale:F2} (telas abertas {_open.Count})");
+                PluginLog.Info($"[AmanatsuVR][TIME] {who}: timeScale {__state:F2} -> {Time.timeScale:F2} (open screens {_open.Count})");
         }
 
         /// <summary>Paused for a while outside the title: drop destroyed screens; nothing left open -> unfreeze.</summary>
@@ -161,7 +161,7 @@ namespace AmanatsuVR.VRUtils
                 if (kv.Value == null || !kv.Value.gameObject.activeInHierarchy)
                 {
                     dead.Add(kv.Key);
-                    PluginLog.Info($"[AmanatsuVR][TIME] tela registrada aberta mas {(kv.Value == null ? "destruida" : $"inativa: {kv.Value.GetType().Name}")}");
+                    PluginLog.Info($"[AmanatsuVR][TIME] screen registered open but {(kv.Value == null ? "destroyed" : $"inactive: {kv.Value.GetType().Name}")}");
                 }
             foreach (var k in dead) _open.Remove(k);
             if (_open.Count > 0)
@@ -170,11 +170,11 @@ namespace AmanatsuVR.VRUtils
                 {
                     _reportedOpen = true;
                     foreach (var kv in _open)
-                        PluginLog.Info($"[AmanatsuVR][TIME] pausado com tela aberta: {kv.Value.GetType().Name} '{kv.Value.name}' ativo={kv.Value.gameObject.activeInHierarchy}");
+                        PluginLog.Info($"[AmanatsuVR][TIME] paused with screen open: {kv.Value.GetType().Name} '{kv.Value.name}' active={kv.Value.gameObject.activeInHierarchy}");
                 }
                 return;
             }
-            PluginLog.Warning($"[AmanatsuVR][TIME] timeScale 0 ha {Grace:F0}s sem nenhuma tela de pausa aberta ({dead.Count} destruida(s)): volta para 1.");
+            PluginLog.Warning($"[AmanatsuVR][TIME] timeScale 0 for {Grace:F0}s with no pause screen open ({dead.Count} destroyed): resetting to 1.");
             Time.timeScale = 1f;
         }
     }

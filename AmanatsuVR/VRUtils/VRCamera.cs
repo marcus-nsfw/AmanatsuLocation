@@ -41,7 +41,7 @@ namespace AmanatsuVR.VRUtils
                     PluginConfig.ReflectHMDRotationY.Value ? angles.y : 0f,
                     PluginConfig.ReflectHMDRotationZ.Value ? angles.z : 0f
                 );
-                PluginLog.Info($"[AmanatsuVR] Viewport recentralizado! BaseHead: Pos={BaseHeadPosition}, Rot={BaseHeadRotation.eulerAngles}");
+                PluginLog.Info($"[AmanatsuVR] Viewport recentered! BaseHead: Pos={BaseHeadPosition}, Rot={BaseHeadRotation.eulerAngles}");
             }
         }
 
@@ -167,13 +167,13 @@ namespace AmanatsuVR.VRUtils
                 var head = VR.head;
                 if (head != null && (head.localScale - Vector3.one).sqrMagnitude > 1e-6f)
                 {
-                    if (_logsEscala++ < 5) PluginLog.Warning($"[AmanatsuVR][ESCALA] cabeca da camera VR com escala {head.localScale}; volta a 1.");
+                    if (_logsEscala++ < 5) PluginLog.Warning($"[AmanatsuVR][SCALE] VR camera head has scale {head.localScale}; resetting to 1.");
                     head.localScale = Vector3.one;
                 }
                 for (var t = VR.origin != null ? VR.origin.parent : null; t != null; t = t.parent)
                 {
                     if ((t.localScale - Vector3.one).sqrMagnitude <= 1e-6f) continue;
-                    if (_logsEscala++ < 5) PluginLog.Warning($"[AmanatsuVR][ESCALA] '{t.name}' acima do rig com escala {t.localScale}; volta a 1.");
+                    if (_logsEscala++ < 5) PluginLog.Warning($"[AmanatsuVR][SCALE] '{t.name}' above the rig with scale {t.localScale}; resetting to 1.");
                     t.localScale = Vector3.one;
                 }
             }

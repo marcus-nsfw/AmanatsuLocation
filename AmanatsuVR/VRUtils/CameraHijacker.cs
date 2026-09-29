@@ -21,16 +21,16 @@ namespace AmanatsuVR.VRUtils
             // NUNCA sequestrar câmeras internas do AmanatsuVR ou câmeras com targetTexture
             if (source.name.Contains("VR") || source.name.Contains("UGUI") || source.name.Contains("UIScreen") || source.name.Contains("Capture"))
             {
-                PluginLog.Warning($"[AmanatsuVR] Tentativa de hijack bloqueada em câmera interna: '{source.name}'");
+                PluginLog.Warning($"[AmanatsuVR] Hijack attempt blocked on internal camera: '{source.name}'");
                 return;
             }
             if (source.targetTexture != null)
             {
-                PluginLog.Warning($"[AmanatsuVR] Tentativa de hijack bloqueada em câmera com targetTexture: '{source.name}'");
+                PluginLog.Warning($"[AmanatsuVR] Hijack attempt blocked on camera with targetTexture: '{source.name}'");
                 return;
             }
 
-            PluginLog.Info(destination ? $"[AmanatsuVR] Hijack {source.name} para {destination?.name}" : $"[AmanatsuVR] Hijack {source.name}");
+            PluginLog.Info(destination ? $"[AmanatsuVR] Hijack {source.name} to {destination?.name}" : $"[AmanatsuVR] Hijack {source.name}");
 
             var srcDistances = source.layerCullDistances;
             if (srcDistances != null)
@@ -40,16 +40,16 @@ namespace AmanatsuVR.VRUtils
                 {
                     if (srcDistances[i] != 0f) naoZero += $" layer{i}={srcDistances[i]:F1}";
                 }
-                PluginLog.Info($"[AmanatsuVR][LAYERCULL] '{source.name}' esferico={source.layerCullSpherical}"
-                    + (naoZero.Length > 0 ? $" distâncias:{naoZero}" : " todas zero (usa far plane)"));
+                PluginLog.Info($"[AmanatsuVR][LAYERCULL] '{source.name}' spherical={source.layerCullSpherical}"
+                    + (naoZero.Length > 0 ? $" distances:{naoZero}" : " all zero (uses far plane)"));
             }
             var srcAddData = source.gameObject.GetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>();
             if (destination && useCopyFrom)
             {
                 GuardaEstereoOriginal(destination);
-                PluginLog.Info($"[AmanatsuVR][ESTEREO] origem '{source.name}': separacao={source.stereoSeparation:F4}"
-                    + $" convergencia={source.stereoConvergence:F2} fisica={source.usePhysicalProperties}"
-                    + $" lensShift={source.lensShift} orto={source.orthographic} escala={source.transform.lossyScale}");
+                PluginLog.Info($"[AmanatsuVR][STEREO] source '{source.name}': separation={source.stereoSeparation:F4}"
+                    + $" convergence={source.stereoConvergence:F2} physical={source.usePhysicalProperties}"
+                    + $" lensShift={source.lensShift} ortho={source.orthographic} scale={source.transform.lossyScale}");
 
                 destination.CopyFrom(source);
 
@@ -79,7 +79,7 @@ namespace AmanatsuVR.VRUtils
                 // everything past 1 m, the UI panel (2 m away) included - only the skybox was left.
                 if (destination.farClipPlane < MinFarClip)
                 {
-                    PluginLog.Info($"[AmanatsuVR][PROJ] far da camera '{source.name}' = {destination.farClipPlane:F2}; usando {MinFarClip:F0}.");
+                    PluginLog.Info($"[AmanatsuVR][PROJ] camera far '{source.name}' = {destination.farClipPlane:F2}; using {MinFarClip:F0}.");
                     destination.farClipPlane = MinFarClip;
                 }
 
@@ -129,7 +129,7 @@ namespace AmanatsuVR.VRUtils
                 foreach (var other in FindObjectsOfType<CameraHijacker>())
                 {
                     if (other == null || other == hijacker || other.Destination != destination) continue;
-                    PluginLog.Info($"[AmanatsuVR] hijacker antigo em '{other.name}' desligado (destino passou para '{source.name}').");
+                    PluginLog.Info($"[AmanatsuVR] old hijacker on '{other.name}' disabled (destination moved to '{source.name}').");
                     other.Destination = null;
                 }
                 hijacker.Destination = destination;
@@ -221,8 +221,8 @@ namespace AmanatsuVR.VRUtils
                 _restantes--;
 
                 PluginLog.Info($"[AmanatsuVR][SPY] frame={Time.frameCount} '{cam.name}'"
-                    + $" olhoAtivo={cam.stereoActiveEye} alvoOlho={cam.stereoTargetEye}"
-                    + $" mask=0x{cam.cullingMask:X8} estereoAtivo={cam.stereoEnabled}"
+                    + $" activeEye={cam.stereoActiveEye} targetEye={cam.stereoTargetEye}"
+                    + $" mask=0x{cam.cullingMask:X8} stereoActive={cam.stereoEnabled}"
                     + $" pos={cam.transform.position}");
             }
         }

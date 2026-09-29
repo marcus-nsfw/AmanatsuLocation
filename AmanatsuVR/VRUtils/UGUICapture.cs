@@ -86,7 +86,7 @@ namespace AmanatsuVR.VRUtils
             }
             catch (System.Exception ex)
             {
-                PluginLog.Warning($"[AmanatsuVR] Falha ao registrar GraphicRegistry: {ex.Message}");
+                PluginLog.Warning($"[AmanatsuVR] Failed to register GraphicRegistry: {ex.Message}");
             }
         }
 
@@ -225,7 +225,7 @@ namespace AmanatsuVR.VRUtils
             if (!FadeTransitions.Contains(g))
             {
                 FadeTransitions.Add(g);
-                PluginLog.Info($"[AmanatsuVR][FADE] desligado '{g.name}' shader='{g.material.shader.name}'");
+                PluginLog.Info($"[AmanatsuVR][FADE] disabled '{g.name}' shader='{g.material.shader.name}'");
             }
             return true;
         }
@@ -279,11 +279,11 @@ namespace AmanatsuVR.VRUtils
         {
             foreach (var p in ParedesAgora)
             {
-                if (!ParedesVistas.Contains(p)) PluginLog.Info($"[AmanatsuVR][PAREDE] + {p}");
+                if (!ParedesVistas.Contains(p)) PluginLog.Info($"[AmanatsuVR][WALL] + {p}");
             }
             foreach (var p in ParedesVistas)
             {
-                if (!ParedesAgora.Contains(p)) PluginLog.Info($"[AmanatsuVR][PAREDE] - {p}");
+                if (!ParedesAgora.Contains(p)) PluginLog.Info($"[AmanatsuVR][WALL] - {p}");
             }
 
             ParedesVistas.Clear();

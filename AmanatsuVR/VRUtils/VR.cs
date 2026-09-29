@@ -37,7 +37,7 @@ namespace AmanatsuVR.VRUtils
         [HideFromIl2Cpp]
         private IEnumerator Setup()
         {
-            PluginLog.Info("[AmanatsuVR] Iniciando inicialização do subsistema OpenVR / SteamVR...");
+            PluginLog.Info("[AmanatsuVR] Starting OpenVR / SteamVR subsystem initialization...");
 
             try
             {
@@ -68,37 +68,37 @@ namespace AmanatsuVR.VRUtils
                             }
                             else
                             {
-                                PluginLog.Warning("[AmanatsuVR] campo OpenVRSettings.s_Settings não encontrado.");
+                                PluginLog.Warning("[AmanatsuVR] field OpenVRSettings.s_Settings not found.");
                             }
 
                             var applied = OpenVRSettings.GetSettings(false);
-                            PluginLog.Info($"[AmanatsuVR] StereoRenderingMode pedido={settings.StereoRenderingMode}"
-                                + $" | o loader vai ler={(applied != null ? applied.StereoRenderingMode.ToString() : "NULO")}");
+                            PluginLog.Info($"[AmanatsuVR] StereoRenderingMode requested={settings.StereoRenderingMode}"
+                                + $" | the loader will read={(applied != null ? applied.StereoRenderingMode.ToString() : "NULL")}");
                         }
                     }
                     catch (Exception setEx)
                     {
-                        PluginLog.Warning($"[AmanatsuVR] Não foi possível definir StereoRenderingMode: {setEx.Message}");
+                        PluginLog.Warning($"[AmanatsuVR] Could not set StereoRenderingMode: {setEx.Message}");
                     }
 
                     var vrLoader = ScriptableObject.CreateInstance<OpenVRLoader>();
                     if (vrLoader.Initialize())
                     {
-                        PluginLog.Info("[AmanatsuVR] OpenVRLoader.Initialize bem-sucedido!");
+                        PluginLog.Info("[AmanatsuVR] OpenVRLoader.Initialize succeeded!");
                     }
                     else
                     {
-                        PluginLog.Error("[AmanatsuVR] Falha em OpenVRLoader.Initialize.");
+                        PluginLog.Error("[AmanatsuVR] Failure in OpenVRLoader.Initialize.");
                         yield break;
                     }
 
                     if (vrLoader.Start())
                     {
-                        PluginLog.Info("[AmanatsuVR] OpenVRLoader.Start bem-sucedido!");
+                        PluginLog.Info("[AmanatsuVR] OpenVRLoader.Start succeeded!");
                     }
                     else
                     {
-                        PluginLog.Error("[AmanatsuVR] Falha em OpenVRLoader.Start.");
+                        PluginLog.Error("[AmanatsuVR] Failure in OpenVRLoader.Start.");
                         yield break;
                     }
 
@@ -106,7 +106,7 @@ namespace AmanatsuVR.VRUtils
                 }
                 catch (Exception e)
                 {
-                    PluginLog.Error($"[AmanatsuVR] Erro durante inicialização do SteamVR: {e}");
+                    PluginLog.Error($"[AmanatsuVR] Error during SteamVR initialization: {e}");
                     yield break;
                 }
 
@@ -119,13 +119,13 @@ namespace AmanatsuVR.VRUtils
                     switch (SteamVR.initializedState)
                     {
                         case SteamVR.InitializedStates.InitializeSuccess:
-                            PluginLog.Info("[AmanatsuVR] SteamVR inicializado com sucesso total!");
+                            PluginLog.Info("[AmanatsuVR] SteamVR fully initialized successfully!");
                             Initialized = true;
                             ActionAfterInitialization?.Invoke();
                             yield break;
 
                         case SteamVR.InitializedStates.InitializeFailure:
-                            PluginLog.Error("[AmanatsuVR] Falha na inicialização do SteamVR.");
+                            PluginLog.Error("[AmanatsuVR] SteamVR initialization failed.");
                             yield break;
 
                         default:
@@ -135,11 +135,11 @@ namespace AmanatsuVR.VRUtils
                     }
                 }
 
-                PluginLog.Warning($"[AmanatsuVR] Timeout ({timeout}s) aguardando prontidão do SteamVR.");
+                PluginLog.Warning($"[AmanatsuVR] Timeout ({timeout}s) waiting for SteamVR to be ready.");
             }
             finally
             {
-                PluginLog.Info("[AmanatsuVR] Concluindo inicializador temporário VR.");
+                PluginLog.Info("[AmanatsuVR] Finishing temporary VR initializer.");
                 Destroy(gameObject);
             }
         }
