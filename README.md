@@ -5,9 +5,8 @@ Source code of four BepInEx 6 (IL2CPP) plugins for **Amanatsu Location** (ILLGAM
 | Plugin | What it does |
 | :--- | :--- |
 | **AmanatsuVR** | Full virtual reality (SteamVR/OpenVR), with controls designed for one hand |
-| **AmanatsuUncensor** | Removes the mosaic, replaces the censored genitals with 3D genitals with physics, and adds **Freemode** |
+| **AmanatsuUncensor** | Removes the mosaic, replaces the censored genitals with 3D genitals with physics, and adds **Freemode**, if other unc mods are detected, it only adds the **Freemode** |
 | **AmanatsuTranslation** | Translates the UI and dialogue (English and Portuguese) |
-| **CreationTuneUp** | Character creation sliders past their limits (-100 to 200) |
 
 ---
 
