@@ -1020,6 +1020,7 @@ namespace AmanatsuVR
             if (Input.GetKeyDown(KeyCode.F9)) SaveUICaptureToPng($"F9_{Time.frameCount}");
             if (Input.GetKeyDown(KeyCode.F10)) CaptureEyeViewsToPng($"F10_{Time.frameCount}");
 
+            FrameWatch.Update();
             AlternarPainel();
             MoveWithStick();
             RelinkPanelAfterSceneChange();

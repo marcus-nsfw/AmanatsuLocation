@@ -17,6 +17,9 @@
     <Reference Include="Il2CppInterop.Runtime">
       <HintPath>..\..\..\BepInEx\core\Il2CppInterop.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="R3">
+      <HintPath>..\..\..\BepInEx\interop\R3.dll</HintPath>
+    </Reference>
     <Reference Include="0Harmony">
       <HintPath>..\..\..\BepInEx\core\0Harmony.dll</HintPath>
     </Reference>

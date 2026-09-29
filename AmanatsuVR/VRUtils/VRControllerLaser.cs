@@ -435,6 +435,7 @@ namespace AmanatsuVR.VRUtils
             bool miraNoMundo = !sobreElementoClicavel && !VRCharCreation.Ativo;
 
             IsVirtualMouseValid = true;
+            AimedHeroine = null;
             if (miraNoMundo) MiraAtravesDaUI(rayOrigin, rayDir);
             else if (VRCharCreation.Ativo && !hitUI) IsVirtualMouseValid = false;
 
@@ -453,7 +454,38 @@ namespace AmanatsuVR.VRUtils
             }
 
             if (IsVirtualMouseValid) EspelhaCursorFisico();
+            // Heroina na mira da mao: a selecao e feita pelo nosso patch do UpdateProc, pelo raio
+            // 3D, e o clique fisico nao vai (senao o jogo tambem mandaria o comando).
+            if (IsTriggerDown && AimedHeroine != null && !_cliqueConsumido)
+            {
+                _selectionPending = true;
+                _cliqueConsumido = true;
+            }
+            if (!IsTriggerHeld) _selectionPending = false;
             InjetaCliqueFisico();
+        }
+
+        /// <summary>OutlineCollider de heroina selecionavel que o raio da mao acerta primeiro, ou null.</summary>
+        public static AL.OutlineCollider AimedHeroine { get; private set; }
+        private static bool _selectionPending;
+
+        /// <summary>True uma unica vez por gatilho que selecionou uma heroina.</summary>
+        public static bool ConsumeSelection()
+        {
+            bool p = _selectionPending;
+            _selectionPending = false;
+            return p;
+        }
+
+        /// <summary>
+        /// A mesma condicao do UpdateProc do jogo (IDA): o OutlineCollider no proprio collider
+        /// acertado, com heroina, cujo estado de animacao atual tem IsSelectChara.
+        /// </summary>
+        private static AL.OutlineCollider SelectableHeroine(Collider c)
+        {
+            var oc = c != null ? c.GetComponent<AL.OutlineCollider>() : null;
+            var st = oc?._heroine?._animation?._param;
+            return st != null && st.IsSelectChara ? oc : null;
         }
 
         [DllImport("user32.dll")]
@@ -512,6 +544,12 @@ namespace AmanatsuVR.VRUtils
         [StructLayout(LayoutKind.Sequential)]
         private struct POINT { public int X; public int Y; }
 
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RECT { public int Left, Top, Right, Bottom; }
+
+        [DllImport("user32.dll")]
+        private static extern bool GetClientRect(System.IntPtr hWnd, out RECT r);
+
         /// <summary>
         /// Poe o cursor do Windows onde o laser esta mirando.
         ///
@@ -539,11 +577,22 @@ namespace AmanatsuVR.VRUtils
 
             try
             {
-                // Unity conta a partir de baixo, o Windows a partir de cima.
-                var p = new POINT { X = (int)vm.x, Y = (int)(Screen.height - vm.y) };
                 System.IntPtr hwnd = EntradaFisica.WindowHandle;
                 if (hwnd == System.IntPtr.Zero) hwnd = GetActiveWindow();
-                if (hwnd == System.IntPtr.Zero || !ClientToScreen(hwnd, ref p)) return;
+                if (hwnd == System.IntPtr.Zero) return;
+                // A area cliente no espaco de coordenadas do Windows nem sempre tem o tamanho de
+                // Screen.width/height: com escala de DPI (medido: 200%) o jogo lia metade da posicao
+                // que o SetCursorPos recebia. GetClientRect, ClientToScreen e SetCursorPos usam o
+                // mesmo espaco, entao escalar pela area cliente acerta em qualquer DPI.
+                float sx = 1f, sy = 1f;
+                if (GetClientRect(hwnd, out RECT rc) && rc.Right > 0 && rc.Bottom > 0)
+                {
+                    sx = rc.Right / (float)Screen.width;
+                    sy = rc.Bottom / (float)Screen.height;
+                }
+                // Unity conta a partir de baixo, o Windows a partir de cima.
+                var p = new POINT { X = (int)(vm.x * sx), Y = (int)((Screen.height - vm.y) * sy) };
+                if (!ClientToScreen(hwnd, ref p)) return;
 
                 // Posicao nao basta para o modo mao da massagem. AL.Oil.MouseTouch tem
                 // GetMouseMove/_mouseSpeedX/_mouseVector: esfregar e movimento, nao clique - por
@@ -691,6 +740,7 @@ namespace AmanatsuVR.VRUtils
             {
                 alvo = hit.point;
                 _alcanceLaser = hit.distance;
+                if (oleo == null) AimedHeroine = SelectableHeroine(hit.collider);
             }
             else
             {
@@ -722,6 +772,12 @@ namespace AmanatsuVR.VRUtils
         /// nomear um OutlineCollider, a coordenada esta errada; se nomear e mesmo assim o clique
         /// nao seleciona, o problema esta na entrega do clique e nao na mira.
         /// </summary>
+        private static string DescribeCamCtrl(AL.OutlinableManager sel)
+        {
+            var cc = sel._acManager?._camCtrl;
+            return cc == null ? "-" : $"controlNow={cc._isControlNow} ctrlNow={cc._isCtrlNow}";
+        }
+
         private void LogSelecao(AL.OutlinableManager sel, Camera cam, int mascara, float alcance)
         {
             if (sel == null)
@@ -740,7 +796,28 @@ namespace AmanatsuVR.VRUtils
                 {
                     var oc = h.collider.GetComponentInParent<AL.OutlineCollider>();
                     batida = $"{h.collider.name} outline={(oc != null ? "SIM" : "nao")} d={h.distance:F1}";
+                    // OutlinableManager.UpdateProc (IDA) so aceita a heroina quando o estado de
+                    // animacao atual tem StateParameter.IsSelectChara; andando/em evento ela nao e clicavel.
+                    var st = oc?._heroine?._animation?._param;
+                    if (oc?._heroine != null) batida += $" selectable={(st != null ? st.IsSelectChara.ToString() : "?")}";
                 }
+
+                // O raio exatamente como UpdateProc (IDA): RaycastNonAlloc com o trigger global,
+                // ordena por distancia e so o PRIMEIRO acerto conta, com o OutlineCollider no
+                // proprio collider (TryGetComponent, nao no pai).
+                string comoJogo = "nada";
+                var hits = new System.Collections.Generic.List<RaycastHit>(Physics.RaycastAll(raio, alcance, mascara));
+                if (hits.Count > 0)
+                {
+                    hits.Sort((a, b) => a.distance.CompareTo(b.distance));
+                    var sb2 = new System.Text.StringBuilder();
+                    for (int i = 0; i < hits.Count && i < 3; i++)
+                        sb2.Append($"{(i > 0 ? ", " : "")}{hits[i].collider.name}@{hits[i].distance:F1}"
+                            + $"(oc={(hits[i].collider.GetComponent<AL.OutlineCollider>() != null ? "Y" : "n")}"
+                            + $" trig={(hits[i].collider.isTrigger ? "Y" : "n")} layer={hits[i].collider.gameObject.layer})");
+                    comoJogo = sb2.ToString();
+                }
+                batida += $" | asGame[{hits.Count}]: {comoJogo} queriesHitTriggers={Physics.queriesHitTriggers}";
 
                 // Input.mousePosition passa pelo nosso patch. Se aqui sair diferente de
                 // VirtualMousePosition, o patch nao esta valendo e o jogo le outra coisa.
@@ -751,7 +828,12 @@ namespace AmanatsuVR.VRUtils
                     + $" | updateProc={VR_OutlinableManager_UpdateProc_Patch.Chamadas} mouseRead={lido}"
                     + $" cursorWin={(GetCursorPos(out POINT cp) ? $"{cp.X},{cp.Y}" : "?")}"
                     + $" screen={Screen.width}x{Screen.height} pixel={cam.pixelWidth}x{cam.pixelHeight}"
-                    + $" overUI={(EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())}");
+                    + $" overUI={(EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())}"
+                    // UpdateProc (IDA) so faz o raio com CameraControllerEX.IsControlNow falso
+                    // (_isControlNow | _isCtrlNow, lidos juntos como WORD em 0x148).
+                    + $" camCtrl={DescribeCamCtrl(sel)}"
+                    + $" client={(GetClientRect(EntradaFisica.WindowHandle, out RECT rc) ? $"{rc.Right}x{rc.Bottom}" : "?")}"
+                    + $" | gameMouse={VR_OutlinableManager_UpdateProc_Patch.MouseCru} framesWithSelection={VR_OutlinableManager_UpdateProc_Patch.ComSelecao}");
 
                 // Com o cursor travado o SetCursorPos nao vale de nada: o Windows devolve o
                 // cursor para o centro e o jogo passa a ler delta, nao posicao. Se o ADV nao
@@ -1275,9 +1357,61 @@ namespace AmanatsuVR.VRUtils
     {
         public static int Chamadas = 0;
 
+        public static int ComSelecao = 0;
+        public static Vector3 MouseCru;
+
+        private delegate void MousePosInjected(out Vector3 v);
+        private static MousePosInjected _mousePos;
+
         public static void Prefix()
         {
             Chamadas++;
+        }
+
+        /// <summary>
+        /// Selecao pela mira 3D da mao, no mesmo caminho do UpdateProc do jogo (IDA): troca o
+        /// _currentCol acendendo/apagando o contorno, e no clique chama _toCommand.OnNext(true)
+        /// (true = o alvo e heroina). Funciona com a heroina fora do enquadramento do monitor,
+        /// onde o raio do jogo, que sai do cursor, nao chega.
+        /// </summary>
+        private static void SelectByHand(AL.OutlinableManager m)
+        {
+            var col = VRControllerLaser.AimedHeroine;
+            if (col == null || !AL.OutlinableManager.Enable) return;
+            var cc = m._acManager?._camCtrl;
+            if (cc != null && (cc._isControlNow || cc._isCtrlNow)) return;
+
+            var atual = m._currentCol;
+            if (atual == null || atual.Pointer != col.Pointer)
+            {
+                if (atual != null) atual.SetOutlinableVisible(false);
+                m._currentCol = col;
+                col.SetOutlinableVisible(true);
+            }
+            if (VRControllerLaser.ConsumeSelection())
+            {
+                PluginLog.Info($"[AmanatsuVR][TARGET] heroine '{col.name}' selected by hand ray");
+                m._toCommand.OnNext(true);
+            }
+            m.SetText();
+        }
+
+        /// <summary>
+        /// Diagnostico: o que o proprio jogo leu (o icall cru, que nao passa pelo nosso patch) e se
+        /// o UpdateProc deixou CurrentCol preenchido ao terminar.
+        /// </summary>
+        public static void Postfix(AL.OutlinableManager __instance)
+        {
+            try { if (Plugin.IsVRModeActive) SelectByHand(__instance); }
+            catch (System.Exception ex) { PluginLog.Warning($"[AmanatsuVR][TARGET] hand selection failed: {ex.Message}"); }
+            try
+            {
+                if (__instance._currentCol != null) ComSelecao++;
+                _mousePos ??= Il2CppInterop.Runtime.IL2CPP.ResolveICall<MousePosInjected>(
+                    "UnityEngine.Input::get_mousePosition_Injected(UnityEngine.Vector3&)");
+                _mousePos(out MouseCru);
+            }
+            catch { }
         }
     }
 
