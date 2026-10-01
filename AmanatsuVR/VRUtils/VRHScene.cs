@@ -843,6 +843,8 @@ namespace AmanatsuVR.VRUtils
         /// </summary>
         // Heading (yaw) of the last frame that did not pass the vertical; NaN = none yet (new actor/mode).
         private float _yawRef = float.NaN;
+        private float _frenteYAntes;
+        private bool _yawTravado;
 
         private Quaternion OrientacaoSemRolagem(Quaternion rotCabeca)
         {
@@ -871,9 +873,15 @@ namespace AmanatsuVR.VRUtils
             float pitch = Mathf.Clamp(-Mathf.Asin(Mathf.Clamp(frente.y, -1f, 1f)) * Mathf.Rad2Deg, -89f, 89f);
             float yaw = plano.sqrMagnitude > 1e-8f ? Mathf.Atan2(plano.x, plano.z) * Mathf.Rad2Deg : _yawRef;
             if (float.IsNaN(yaw)) yaw = 0f;
-            if (!float.IsNaN(_yawRef) && Mathf.Abs(frente.y) > 0.7f && Mathf.Abs(Mathf.DeltaAngle(_yawRef, yaw)) > 90f)
-                yaw = _yawRef;
-            else _yawRef = yaw;
+            // A trava so vale para a cabeca passando pela vertical (quadro anterior quase vertical, ou ja
+            // travada). Troca de pose/estado (cansada, acelerar para finalizar) salta o yaw sem passar
+            // pela vertical; travar ai prendia a camera na direcao velha enquanto a cabeca seguia inclinada.
+            float yAntes = _frenteYAntes;
+            _frenteYAntes = Mathf.Abs(frente.y);
+            bool passando = _yawTravado || yAntes > 0.9f;
+            if (passando && !float.IsNaN(_yawRef) && Mathf.Abs(frente.y) > 0.7f && Mathf.Abs(Mathf.DeltaAngle(_yawRef, yaw)) > 90f)
+            { yaw = _yawRef; _yawTravado = true; }
+            else { _yawRef = yaw; _yawTravado = false; }
             return Quaternion.Euler(pitch, yaw, 0f);
         }
 
@@ -894,7 +902,10 @@ namespace AmanatsuVR.VRUtils
                 _escalaPescoco = pescoco.localScale; // a escala original volta intacta
                 SeparaColisores(pescoco, cabeca);    // ainda sem encolher: pose e escala reais
             }
-            // Todo quadro: se a animacao escrever escala no pescoco, a nossa vem depois.
+            // Todo quadro: se a animacao escrever escala no pescoco, a nossa vem depois. O que ela
+            // escreveu e a escala real deste quadro (muda com a pose/estado); guardada, nao fica velha.
+            Vector3 atual = pescoco.localScale;
+            if (atual != Vector3.one * EscalaOculta) _escalaPescoco = atual;
             pescoco.localScale = Vector3.one * EscalaOculta;
         }
 

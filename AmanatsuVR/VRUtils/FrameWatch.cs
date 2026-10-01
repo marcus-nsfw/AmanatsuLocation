@@ -1,4 +1,5 @@
 using UnityEngine;
+using Valve.VR;
 using AmanatsuVR.Logging;
 
 namespace AmanatsuVR.VRUtils
@@ -31,7 +32,11 @@ namespace AmanatsuVR.VRUtils
                 ? $"cpu={_timing[0].cpuFrameTime:F1}ms gpu={_timing[0].gpuFrameTime:F1}ms" : "timing=n/a";
             int cams = 0, ours = 0;
             foreach (var c in Object.FindObjectsOfType<Camera>()) { cams++; if (c.name.StartsWith("AmanatsuVR")) ours++; }
-            PluginLog.Warning($"[AmanatsuVR][FPS] {fps:F0} fps for {Window:F0}s | {gpu} | cameras={cams} (ours {ours})"
+            // Headset fora da cabeca (standby) faz o runtime estrangular o jogo para ~5-10 fps:
+            // nao e queda do jogo. Hora para cruzar com os logs do SteamVR (vrserver/vrcompositor).
+            string hmd = "?";
+            try { if (OpenVR.System != null) hmd = OpenVR.System.GetTrackedDeviceActivityLevel(OpenVR.k_unTrackedDeviceIndex_Hmd).ToString().Replace("k_EDeviceActivityLevel_", ""); } catch { }
+            PluginLog.Warning($"[AmanatsuVR][FPS] {System.DateTime.Now:HH:mm:ss} {fps:F0} fps for {Window:F0}s | hmd={hmd} | {gpu} | cameras={cams} (ours {ours})"
                 + $" hijackers={Object.FindObjectsOfType<CameraHijacker>().Length}"
                 + $" uiScreens={Object.FindObjectsOfType<UIScreen>().Length}"
                 + $" renderers={Object.FindObjectsOfType<Renderer>().Length}"
